@@ -1,6 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speedtimer_fltr/data/events/events.dart';
 import 'package:speedtimer_fltr/domain/entity/result_avg_data.dart';
+import 'package:speedtimer_fltr/themes/themes.dart';
 
 //1 - 2by2
 //2 - 3by3
@@ -35,6 +36,8 @@ abstract class SPKeys {
   static const bestClockAvg12 = "bestClockAvg12";
   static const bestClockAvg50 = "bestClockAvg50";
   static const bestClockAvg100 = "best2ClockAg100";
+
+  static const themeKey = "theme";
 }
 
 class _BestResultDataKeys {
@@ -56,10 +59,21 @@ class SharedPreferencesStorage {
 
   SharedPreferencesStorage._();
 
+  Future<void> setTheme(AppTheme theme) async {
+    int i = _themeToInt(theme);
+    (await _prefs).setInt(SPKeys.themeKey, i);
+  }
+
+  Future<AppTheme> getTheme() async {
+    int i = (await _prefs).getInt(SPKeys.themeKey) ?? 1;
+    return _intToTheme(i);
+  }
+
   Future<void> setEvent(Event event) async {
     int i = _eventToInt(event);
     (await _prefs).setInt(SPKeys.eventKey, i);
   }
+
 
   Future<Event> getEvent() async {
     int i = (await _prefs).getInt(SPKeys.eventKey) ?? 2; // default 3by3
@@ -190,6 +204,35 @@ class SharedPreferencesStorage {
             bestAvg12: SPKeys.bestClockAvg12,
             bestAvg50: SPKeys.bestClockAvg50,
             bestAvg100: SPKeys.bestClockAvg100);
+    }
+  }
+
+  //1 - default
+  //2 - dark
+  //3 - sunset
+
+  AppTheme _intToTheme(int i) {
+    switch (i) {
+      case 1: {
+        return AppTheme.defaultTheme;
+      }
+      case 2: {
+        return AppTheme.darkTheme;
+      }
+      case 3: {
+        return AppTheme.sunsetTheme;
+      }
+      default: {
+        return AppTheme.defaultTheme;
+      }
+    }
+  }
+
+  int _themeToInt(AppTheme theme) {
+    switch (theme) {
+      case AppTheme.defaultTheme: return 1;
+      case AppTheme.darkTheme: return 2;
+      case AppTheme.sunsetTheme: return 3;
     }
   }
 }

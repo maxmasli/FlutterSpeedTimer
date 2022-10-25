@@ -8,6 +8,7 @@ import 'package:speedtimer_fltr/data/repositories/result_repository.dart';
 import 'package:speedtimer_fltr/data/repositories/settings_repository.dart';
 import 'package:speedtimer_fltr/domain/entity/result_avg_data.dart';
 import 'package:speedtimer_fltr/domain/entity/result_entity.dart';
+import 'package:speedtimer_fltr/ui/interfaces/EventChangeable.dart';
 
 class ResultViewModelState {
   List<ResultEntity> results = [];
@@ -23,7 +24,7 @@ class ResultViewModelState {
   ResultEntity? resultInBottomSheet;
 }
 
-class ResultViewModel extends ChangeNotifier {
+class ResultViewModel extends ChangeNotifier implements EventChangeable {
   final _resultRepository = ResultRepository();
   final _settingsRepository = SettingsRepository();
   final _bestResultRepository = BestAvgRepository();
@@ -78,6 +79,13 @@ class ResultViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateDescriptionFromBottomSheet(String updatedDescription) {
+    viewModelState.resultInBottomSheet!.description = updatedDescription;
+    _updateResult(viewModelState.resultInBottomSheet!);
+    //_update();
+    notifyListeners();
+  }
+
   Future<void> _saveResult(ResultEntity result) async {
     await _resultRepository.saveResult(result);
   }
@@ -116,5 +124,17 @@ class ResultViewModel extends ChangeNotifier {
     viewModelState.resultAvgData = resultAvgData;
     viewModelState.best = _resultCounter.getBest(viewModelState.results);
     viewModelState.total = _resultCounter.getCount(viewModelState.results);
+    notifyListeners();
   }
+
+  @override
+  void setEvent(Event event) async {
+    await _settingsRepository.setEvent(event);
+    viewModelState.event = event;
+    _resultRepository.notifyEventChanged();
+    await _update();
+    notifyListeners();
+  }
+
+
 }

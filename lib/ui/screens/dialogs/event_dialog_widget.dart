@@ -3,17 +3,17 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:speedtimer_fltr/data/events/events.dart';
 import 'package:speedtimer_fltr/resources/resources.dart';
-import 'package:speedtimer_fltr/strings/strings.dart';
-import 'package:speedtimer_fltr/ui/screens/timer_screen/timer_view_model.dart';
+import 'package:speedtimer_fltr/resources/strings.dart';
+import 'package:speedtimer_fltr/ui/interfaces/EventChangeable.dart';
 
-class TimerEventDialogWidget extends StatelessWidget {
-  const TimerEventDialogWidget({Key? key, required this.parentContext}) : super(key: key);
+class EventDialogWidget<T extends EventChangeable> extends StatelessWidget {
+  const EventDialogWidget({Key? key, required this.parentContext}) : super(key: key);
 
   final BuildContext parentContext;
 
   @override
   Widget build(BuildContext context) {
-    final viewModel = parentContext.read<TimerViewModel>();
+    final viewModel = parentContext.read<T>();
     return AlertDialog(
       title: const Text(Strings.chooseEvent),
       content: Wrap(

@@ -1,11 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:speedtimer_fltr/strings/strings.dart';
-import 'package:speedtimer_fltr/ui/navigation/timer_navigation.dart';
-import 'package:speedtimer_fltr/ui/screens/dialogs/timer_event_dialog_widget.dart';
+import 'package:speedtimer_fltr/resources/strings.dart';
 import 'package:speedtimer_fltr/ui/screens/timer_screen/timer_view_model.dart';
-import 'package:speedtimer_fltr/utils/time_format.dart';
+import 'package:speedtimer_fltr/utils/functions.dart';
 
 class TimerWidget extends StatelessWidget {
   const TimerWidget({Key? key}) : super(key: key);
@@ -49,8 +47,11 @@ class _TimerBodyWidget extends StatelessWidget {
         children: [
           Column(
             children: const [
+              SizedBox(height: 5),
               _TimerTimeWidget(),
+              SizedBox(height: 5),
               _TimerScrambleWidget(),
+              SizedBox(height: 10),
               _TimerResultsWidget(),
             ],
           ),
@@ -75,7 +76,26 @@ class _PenaltyButtonsWidget extends StatelessWidget {
         _DNFButtonWidget(),
         SizedBox(width: 15),
         _PlusButtonWidget(),
+        SizedBox(width: 15),
+        _DeleteButtonWidget(),
       ],
+    );
+  }
+}
+
+class _DeleteButtonWidget extends StatelessWidget {
+  const _DeleteButtonWidget({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final viewModel = context.read<TimerViewModel>();
+
+    return TextButton(
+      onPressed: () => viewModel.deleteResult(),
+      child: Text(
+        Strings.delete,
+        style: Theme.of(context).textTheme.bodyText1
+      ),
     );
   }
 }
@@ -92,30 +112,22 @@ class _DNFButtonWidget extends StatelessWidget {
     late Color backgroundColor;
 
     if (currentResult == null) {
-      backgroundColor = Colors.white;
+      backgroundColor = Theme.of(context).scaffoldBackgroundColor;
     } else if (currentResult.isDNF) {
       backgroundColor = Colors.red;
     } else {
-      backgroundColor = Colors.white;
+      backgroundColor = Theme.of(context).scaffoldBackgroundColor;
     }
 
     return TextButton(
       onPressed: () => viewModel.setDNF(),
       style: ButtonStyle(
-        overlayColor: MaterialStateProperty.all<Color>(
-            Colors.black12
-        ),
-        backgroundColor: MaterialStateProperty.all<Color>(
-            backgroundColor
-        ),
-        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18.0),
-            side: const BorderSide(color: Colors.black),
-          ),
-        ),
+        backgroundColor: MaterialStateProperty.all<Color>(backgroundColor),
       ),
-      child: const Text("DNF", style: TextStyle(color: Colors.black),),
+      child: Text(
+        Strings.DNF,
+        style: TextStyle(color: Theme.of(context).textTheme.bodyText1!.color),
+      ),
     );
   }
 }
@@ -127,40 +139,29 @@ class _PlusButtonWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final viewModel = context.read<TimerViewModel>();
 
-    //final currentResult = context.select((TimerViewModel value) => value.viewModelState.currentResult);
     final currentResult = context.watch<TimerViewModel>().viewModelState.currentResult;
     late Color backgroundColor;
 
     if (currentResult == null) {
-      backgroundColor = Colors.white;
+      backgroundColor = Theme.of(context).scaffoldBackgroundColor;
     } else if (currentResult.isPlus) {
       backgroundColor = Colors.red;
     } else {
-      backgroundColor = Colors.white;
+      backgroundColor = Theme.of(context).scaffoldBackgroundColor;
     }
 
     return TextButton(
       onPressed: () => viewModel.setPlus(),
       style: ButtonStyle(
-        overlayColor: MaterialStateProperty.all<Color>(
-            Colors.black12
-        ),
-        backgroundColor: MaterialStateProperty.all<Color>(
-            backgroundColor
-        ),
-        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18.0),
-            side: const BorderSide(color: Colors.black),
-          ),
-        ),
+        backgroundColor: MaterialStateProperty.all<Color>(backgroundColor),
       ),
-      child: const Text("+2", style: TextStyle(color: Colors.black),),
+      child: Text(
+        Strings.plus2,
+        style: TextStyle(color: Theme.of(context).textTheme.bodyText1!.color),
+      ),
     );
   }
 }
-
-
 
 class _TimerEditWidget extends StatelessWidget {
   const _TimerEditWidget({Key? key}) : super(key: key);
@@ -169,18 +170,18 @@ class _TimerEditWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: [
+      children: const [
         Expanded(
           child: ElevatedButton(
-            onPressed: () {},
-            child: const Text(Strings.writeYourScramble),
+            onPressed: null,
+            child: Text(Strings.writeYourScramble),
           ),
         ),
-        const SizedBox(width: 10),
+        SizedBox(width: 10),
         Expanded(
           child: ElevatedButton(
-            onPressed: () {},
-            child: const Text(Strings.writeTime),
+            onPressed: null,
+            child: Text(Strings.writeTime),
           ),
         ),
       ],
@@ -196,7 +197,9 @@ class _TimerTimeWidget extends StatelessWidget {
     final state = context.select((TimerViewModel value) => value.viewModelState.state);
     final time = context.select((TimerViewModel value) => value.viewModelState.time);
 
-    final color = state == TimerState.readyToStart ? Colors.green : Colors.black;
+    final color = state == TimerState.readyToStart
+        ? Colors.green
+        : Theme.of(context).textTheme.bodyText1!.color;
 
     return Text(
       millisToString(time),
@@ -211,12 +214,22 @@ class _TimerScrambleWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scramble = context.select((TimerViewModel value) => value.viewModelState.scramble);
-    return Text(
-      scramble,
-      style: const TextStyle(
-        fontSize: 20,
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(7),
+        color: Theme.of(context).primaryColor,
       ),
-      textAlign: TextAlign.center,
+      child: Padding(
+        padding: const EdgeInsets.all(4),
+        child: Text(
+          scramble,
+          style: const TextStyle(
+            fontSize: 20,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ),
     );
   }
 }
@@ -279,25 +292,37 @@ class _TimerResultsWidget extends StatelessWidget {
   }
 }
 
+// SER - Settings Event Results :)
 class _TimerSERButtonsWidget extends StatelessWidget {
   const _TimerSERButtonsWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Row(
-      children: [
-        SizedBox(
-          width: 70,
-          child: ElevatedButton(
-            onPressed: () {},
-            child: const Icon(Icons.settings),
-          ),
-        ),
-        const SizedBox(width: 10),
-        const _TimerEventButtonWidget(),
-        const SizedBox(width: 10),
-        const _TimerResultsButtonWidget(),
+      children: const [
+        _TimerSettingsButtonWidget(),
+        SizedBox(width: 10),
+        _TimerEventButtonWidget(),
+        SizedBox(width: 10),
+        _TimerResultsButtonWidget(),
       ],
+    );
+  }
+}
+
+class _TimerSettingsButtonWidget extends StatelessWidget {
+  const _TimerSettingsButtonWidget({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final viewModel = context.read<TimerViewModel>();
+
+    return SizedBox(
+      width: 70,
+      child: ElevatedButton(
+        onPressed: () => viewModel.navigateToSettings(context),
+        child: Icon(Icons.settings, color: Theme.of(context).textTheme.bodyText1!.color,),
+      ),
     );
   }
 }
@@ -307,14 +332,12 @@ class _TimerEventButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = context.read<TimerViewModel>();
+
     return Expanded(
       child: ElevatedButton(
-        onPressed: () => showDialog(
-            context: context,
-            builder: (BuildContext dialogContext) {
-              return TimerEventDialogWidget(parentContext: context);
-            }),
-        child: const Text(Strings.event),
+        onPressed: () => viewModel.showEventDialog(context),
+        child: Text(Strings.event, style: TextStyle(color: Theme.of(context).textTheme.bodyText1!.color),),
       ),
     );
   }
@@ -325,15 +348,15 @@ class _TimerResultsButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = context.read<TimerViewModel>();
+
     return SizedBox(
       width: 70,
       child: ElevatedButton(
-        onPressed: () => Navigator.of(context).pushReplacementNamed(TimerNavigation.results),
+        onPressed: () => viewModel.navigateToResults(context),
         // navigate to results
-        child: const Icon(Icons.wysiwyg),
+        child: Icon(Icons.wysiwyg, color: Theme.of(context).textTheme.bodyText1!.color,),
       ),
     );
   }
 }
-
-

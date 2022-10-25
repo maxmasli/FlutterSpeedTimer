@@ -1,5 +1,6 @@
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:speedtimer_fltr/data/events/events.dart';
+import 'package:speedtimer_fltr/utils/consts.dart';
 
 part 'result_entity.g.dart';
 
@@ -27,9 +28,11 @@ class ResultEntity {
   int index;
 
   int getTime() {
-    if (isPlus) return time + 2000;
+    if (isPlus) return time + PENALTY_TIME;
     return time;
   }
+
+  bool get isDescriptionEmpty => description.isEmpty;
 
   ResultEntity(
       {required this.time,

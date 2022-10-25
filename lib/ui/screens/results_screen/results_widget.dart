@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
-import 'package:speedtimer_fltr/data/events/events.dart';
 import 'package:speedtimer_fltr/domain/entity/result_entity.dart';
-import 'package:speedtimer_fltr/resources/resources.dart';
-import 'package:speedtimer_fltr/strings/strings.dart';
+import 'package:speedtimer_fltr/resources/strings.dart';
 import 'package:speedtimer_fltr/ui/navigation/timer_navigation.dart';
+import 'package:speedtimer_fltr/ui/screens/dialogs/event_dialog_widget.dart';
 import 'package:speedtimer_fltr/ui/screens/dialogs/result_bottom_sheet_widget.dart';
 import 'package:speedtimer_fltr/ui/screens/results_screen/result_view_model.dart';
-import 'package:speedtimer_fltr/utils/time_format.dart';
+import 'package:speedtimer_fltr/utils/functions.dart';
 
 class ResultsWidget extends StatelessWidget {
   const ResultsWidget({Key? key}) : super(key: key);
@@ -118,7 +117,11 @@ class _ResultDeleteButtonWidget extends StatelessWidget {
           height: 50,
           child: Stack(
             children: [
-              IconButton(onPressed: () {}, icon: const Icon(Icons.delete)),
+              IconButton(
+                onPressed: () {},
+                icon: const Icon(Icons.delete),
+                color: Theme.of(context).textTheme.bodyText1!.color,
+              ),
               SizedBox(
                 child: ClipOval(
                   child: Material(
@@ -143,37 +146,22 @@ class _ResultsInfoEventImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final event = context.select((ResultViewModel value) => value.viewModelState.event);
-    late String path;
-    switch (event) {
-      case Event.event2by2:
-        {
-          path = Svgs.icon2by2;
-          break;
-        }
-      case Event.event3by3:
-        {
-          path = Svgs.icon3by3;
-          break;
-        }
-      case Event.eventPyra:
-        {
-          path = Svgs.iconPyra;
-          break;
-        }
-      case Event.eventSkewb:
-        {
-          path = Svgs.iconSkewb;
-          break;
-        }
-      case Event.eventClock:
-        {
-          path = Svgs.iconClock;
-          break;
-        }
-    }
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 15),
-      child: SvgPicture.asset(path, width: 70, height: 70),
+    final path = getImagePath(event);
+    return GestureDetector(
+      onTap: () => showDialog(
+          context: context,
+          builder: (BuildContext dialogContext) {
+            return EventDialogWidget<ResultViewModel>(parentContext: context);
+          }),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 15),
+        child: SvgPicture.asset(
+          path,
+          width: 70,
+          height: 70,
+          color: Theme.of(context).textTheme.bodyText1!.color,
+        ),
+      ),
     );
   }
 }
@@ -213,10 +201,19 @@ class _ResultListItemWidget extends StatelessWidget {
 
   void showResultBottomSheet(BuildContext parentContext) {
     showModalBottomSheet(
+      shape: const RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+      ),
+      isScrollControlled: true,
+
       context: parentContext,
       builder: (context) => StatefulBuilder(
         builder: (context, state) {
-          return ResultBottomSheetWidget(parentContext: parentContext);
+          return Padding(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: ResultBottomSheetWidget(parentContext: parentContext),
+          );
         },
       ),
     );
@@ -229,16 +226,27 @@ class _ResultListItemWidget extends StatelessWidget {
         context.read<ResultViewModel>().setResultInBottomSheet(resultEntity);
         showResultBottomSheet(context);
       },
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(width: 3),
-          borderRadius: const BorderRadius.all(
-            Radius.circular(15),
+      child: Stack(
+        children: [
+          if (!resultEntity.isDescriptionEmpty)
+            const Positioned(
+              bottom: 8,
+              left: 8,
+              child: Icon(Icons.create, color: Colors.grey, size: 20),
+            ),
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(width: 3, color: Theme.of(context).textTheme.bodyText1!.color!),
+
+              borderRadius: const BorderRadius.all(
+                Radius.circular(15),
+              ),
+            ),
+            child: Center(
+              child: Text(millisToString(resultEntity.isDNF ? null : resultEntity.getTime())),
+            ),
           ),
-        ),
-        child: Center(
-          child: Text(millisToString(resultEntity.isDNF ? null : resultEntity.getTime())),
-        ),
+        ],
       ),
     );
   }

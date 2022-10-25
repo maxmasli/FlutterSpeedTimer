@@ -10,6 +10,10 @@ import 'package:speedtimer_fltr/data/repositories/scramble_repository.dart';
 import 'package:speedtimer_fltr/data/repositories/settings_repository.dart';
 import 'package:speedtimer_fltr/domain/entity/result_avg_data.dart';
 import 'package:speedtimer_fltr/domain/entity/result_entity.dart';
+import 'package:speedtimer_fltr/ui/interfaces/EventChangeable.dart';
+import 'package:speedtimer_fltr/ui/navigation/timer_navigation.dart';
+import 'package:speedtimer_fltr/ui/screens/dialogs/event_dialog_widget.dart';
+import 'package:speedtimer_fltr/utils/consts.dart';
 import 'package:speedtimer_fltr/utils/speedcubing_timer.dart';
 
 enum TimerState { stop, running, readyToStart }
@@ -27,7 +31,7 @@ class _TimerViewModelState {
   ResultEntity? currentResult;
 }
 
-class TimerViewModel extends ChangeNotifier {
+class TimerViewModel extends ChangeNotifier implements EventChangeable{
   final _resultRepository = ResultRepository();
   final _scrambleRepository = ScrambleRepository();
   final _settingsRepository = SettingsRepository();
@@ -48,6 +52,25 @@ class TimerViewModel extends ChangeNotifier {
     _recountAvg();
   }
 
+  void showEventDialog(BuildContext context) {
+    if (viewModelState.state == TimerState.running) return;
+    showDialog(
+        context: context,
+        builder: (BuildContext dialogContext) {
+          return EventDialogWidget<TimerViewModel>(parentContext: context);
+        });
+  }
+
+  void navigateToResults(BuildContext context) {
+    if (viewModelState.state == TimerState.running) return;
+    Navigator.of(context).pushReplacementNamed(TimerNavigation.results);
+  }
+
+  void navigateToSettings(BuildContext context) {
+    if (viewModelState.state == TimerState.running) return;
+    Navigator.of(context).pushReplacementNamed(TimerNavigation.settings);
+  }
+
   void onTapDown() {
     if (viewModelState.state == TimerState.stop) {
       viewModelState.state = TimerState.readyToStart;
@@ -66,15 +89,17 @@ class TimerViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  @override
   void setEvent(Event event) {
     _settingsRepository.setEvent(event);
     viewModelState.event = event;
+    _resultRepository.notifyEventChanged();
     _generateScramble();
     _recountAvg();
   }
 
   void setDNF() async {
-    if (viewModelState.currentResult == null) return;
+    if (viewModelState.currentResult == null || viewModelState.state == TimerState.running) return;
     final updatedResult = viewModelState.currentResult;
     final isDNF = !updatedResult!.isDNF;
     updatedResult.isDNF = isDNF;
@@ -89,11 +114,17 @@ class TimerViewModel extends ChangeNotifier {
   }
 
   void setPlus() async {
-    if (viewModelState.currentResult == null) return;
+    if (viewModelState.currentResult == null || viewModelState.state == TimerState.running) return;
     final updatedResult = viewModelState.currentResult;
     final isPlus = !updatedResult!.isPlus;
     updatedResult.isPlus = isPlus;
     viewModelState.currentResult = updatedResult;
+
+    if (isPlus) {
+      viewModelState.time += PENALTY_TIME;
+    } else {
+      viewModelState.time -= PENALTY_TIME;
+    }
 
     print("set +2 ${viewModelState.currentResult!.isPlus}");
     await _resultRepository.popLastResult(viewModelState.event);
@@ -101,6 +132,14 @@ class TimerViewModel extends ChangeNotifier {
     await _saveCurrentResult(updatedResult);
     _recountAvg(recountAgain: true);
     notifyListeners();
+  }
+
+  void deleteResult() async {
+    if (viewModelState.currentResult == null || viewModelState.state == TimerState.running) return;
+    await _resultRepository.deleteResult(viewModelState.currentResult!);
+    viewModelState.currentResult = null;
+    viewModelState.time = 0;
+    _recountAvg();
   }
 
   void _startTimer() {
@@ -139,7 +178,7 @@ class TimerViewModel extends ChangeNotifier {
         event: viewModelState.event,
         isDNF: false,
         isPlus: false,
-        index: ResultRepository.lastIndex);
+        index: ResultRepository.lastIndex!);
 
     await _resultRepository.saveResult(viewModelState.currentResult!);
   }

@@ -1,3 +1,6 @@
+import 'package:speedtimer_fltr/data/events/events.dart';
+import 'package:speedtimer_fltr/resources/resources.dart';
+
 String millisToString(int? millis) {
   if (millis == null) return "DNF";
   var result = "";
@@ -53,4 +56,36 @@ String millisToString(int? millis) {
     result += "$m";
   }
   return result;
+}
+
+String getImagePath(Event event) {
+  late String path;
+  switch (event) {
+    case Event.event2by2:
+      {
+        path = Svgs.icon2by2;
+        break;
+      }
+    case Event.event3by3:
+      {
+        path = Svgs.icon3by3;
+        break;
+      }
+    case Event.eventPyra:
+      {
+        path = Svgs.iconPyra;
+        break;
+      }
+    case Event.eventSkewb:
+      {
+        path = Svgs.iconSkewb;
+        break;
+      }
+    case Event.eventClock:
+      {
+        path = Svgs.iconClock;
+        break;
+      }
+  }
+  return path;
 }

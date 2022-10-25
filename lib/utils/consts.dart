@@ -1,0 +1,1 @@
+int PENALTY_TIME = 2000;

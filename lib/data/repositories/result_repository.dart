@@ -11,7 +11,12 @@ abstract class BoxNames {
 }
 
 class ResultRepository {
-  static int lastIndex = 0;
+  static int? lastIndex;
+
+  void notifyEventChanged() {
+    // after call this method you should call: getAllResultsByEvent(Event event): to make lastIndex not null
+    lastIndex = null;
+  }
 
   Future<List<ResultEntity>> getAllResultsByEvent(Event event) async {
     print("getting all results");
@@ -21,10 +26,15 @@ class ResultRepository {
 
     final results = box.values.toList();
 
-    lastIndex = results.length;
-
-    for (var r in results) {
-      print(r.index);
+    //if this method called first time
+    if (lastIndex == null) {
+      int maxIndex = 0;
+      for (var result in results) {
+        if (result.index > maxIndex) {
+          maxIndex = result.index;
+        }
+      }
+      lastIndex = maxIndex + 1;
     }
 
     await box.close();
@@ -49,7 +59,8 @@ class ResultRepository {
     final boxName = _getBoxName(result.event);
     final box = await Hive.openBox<ResultEntity>(boxName);
     await box.add(result);
-    lastIndex = box.values.length;
+
+    lastIndex = lastIndex! + 1;
     await box.close();
   }
 
@@ -68,7 +79,7 @@ class ResultRepository {
     final key = await box.keyAt(index);
     final result = box.get(key);
     await box.delete(key);
-    lastIndex = box.values.length;
+    lastIndex = lastIndex! - 1;
     if (result == null) throw Exception("pop last result Result == null");
     await box.close();
     return result;
@@ -81,8 +92,6 @@ class ResultRepository {
     final resultToUpdate =
         box.values.where((_resultEntity) => _resultEntity.index == resultEntity.index).toList()[0];
     final index = box.values.toList().indexOf(resultToUpdate);
-
-    lastIndex = box.values.length - 1;
 
     await box.deleteAt(index);
 
