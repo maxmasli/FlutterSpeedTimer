@@ -1,0 +1,1 @@
+const int penaltyInMillis = 2000;

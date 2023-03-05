@@ -1,0 +1,1 @@
+part 'svgs.dart';
