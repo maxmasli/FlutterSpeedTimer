@@ -8,6 +8,8 @@ import 'package:speedtimer_flutter/core/utils/utils.dart';
 import 'package:speedtimer_flutter/features/speedtimer/presentation/bloc/timer_bloc.dart';
 import 'dart:math' as math;
 
+import 'package:speedtimer_flutter/features/speedtimer/presentation/widgets/change_event_dialog.dart';
+
 class TimerPage extends StatelessWidget {
   const TimerPage({Key? key}) : super(key: key);
 
@@ -24,6 +26,7 @@ class TimerPage extends StatelessWidget {
               TimerPlus2ButtonWidget(),
               TimerDNFButtonWidget(),
               TimerDeleteResultWidget(),
+              TimerChangeEventButtonWidget(),
             ],
           )
         ],
@@ -224,6 +227,22 @@ class TimerDeleteResultWidget extends StatelessWidget {
         bloc.add(const TimerDeleteResultEvent(null));
       },
       icon: const Icon(Icons.delete),
+    );
+  }
+}
+
+class TimerChangeEventButtonWidget extends StatelessWidget {
+  const TimerChangeEventButtonWidget({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: () {
+        showDialog(context: context, builder: (context) {
+          return ChangeEventDialog();
+        });
+      },
+      icon: const Icon(Icons.abc),
     );
   }
 }

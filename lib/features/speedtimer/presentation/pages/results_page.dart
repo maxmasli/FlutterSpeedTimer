@@ -44,10 +44,10 @@ class ResultsAppBarWidget extends StatelessWidget {
           color: Theme.of(context).primaryColor,
           child: Row(
             children: [
-              ResultsAvgWidget(),
-              ResultsBestAvgWidget(),
-              ResultsDeleteAllButtonWidget(),
-              ResultEventImageWidget(),
+              const ResultsAvgWidget(),
+              const ResultsBestAvgWidget(),
+              const ResultsDeleteAllButtonWidget(),
+              const ResultEventImageWidget(),
             ],
           ),
         ),
@@ -110,7 +110,7 @@ class ResultsDeleteAllButtonWidget extends StatelessWidget {
       onPressed: () {
         context.read<TimerBloc>().add(TimerDeleteAllResultsEvent());
       },
-      child: Text("delete"),
+      child: const Text("delete"),
     );
   }
 }
@@ -123,18 +123,11 @@ class ResultEventImageWidget extends StatelessWidget {
     return BlocBuilder<TimerBloc, TimerState>(
       buildWhen: (prev, state) => prev.event != state.event,
       builder: (context, state) {
-        switch (state.event) {
-          case Event.cube222:
-            return SvgPicture.asset(Svgs.c222, width: 50, height: 50);
-          case Event.cube333:
-            return SvgPicture.asset(Svgs.c333, width: 50, height: 50);
-          case Event.pyraminx:
-            return SvgPicture.asset(Svgs.pyram, width: 50, height: 50);
-          case Event.skewb:
-            return SvgPicture.asset(Svgs.skewb, width: 50, height: 50);
-          case Event.clock:
-            return SvgPicture.asset(Svgs.clock, width: 50, height: 50);
-        }
+        return SvgPicture.asset(
+          getSvgAssetByEvent(state.event),
+          width: 50,
+          height: 50,
+        );
       },
     );
   }
@@ -153,7 +146,7 @@ class ResultsWidget extends StatelessWidget {
           prev.isLoading != state.isLoading,
       builder: (context, state) {
         if (state.isLoading) {
-          return CircularProgressIndicator();
+          return const CircularProgressIndicator();
         } else {
           return Expanded(
             child: GridView.builder(

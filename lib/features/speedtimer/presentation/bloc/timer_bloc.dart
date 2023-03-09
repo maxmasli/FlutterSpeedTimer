@@ -75,7 +75,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     on<TimerStopEvent>(_timerStop);
     on<TimerSaveResultEvent>(_saveResult);
     on<TimerGetScrambleEvent>(_getScramble);
-    on<TimerGetAllResultsEvent>(_getAllResults);
+    on<TimerGetAllResultsAndRecalculateEvent>(_getAllResultsAndRecalculate);
     on<TimerPlus2Event>(_setPlus2);
     on<TimerDNFEvent>(_setDNF);
     on<TimerDeleteResultEvent>(_deleteResult);
@@ -85,12 +85,13 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     on<TimerGetBestAvgEvent>(_getBestAvg);
     on<TimerCompareBestAvgEvent>(_compareBestAvg);
     on<TimerDeleteAllResultsEvent>(_deleteAllResults);
+    on<TimerChangeEvent>(_changeEvent);
   }
 
   ///this method calls when starting
   void _appStarted(TimerAppStartedEvent event, Emitter<TimerState> emit) {
     add(TimerGetScrambleEvent());
-    add(TimerGetAllResultsEvent());
+    add(TimerGetAllResultsAndRecalculateEvent());
     //add(TimerRecountAvgEvent());
   }
 
@@ -170,16 +171,16 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
   ///the method receives the scramble and writes it to the state
   Future<void> _getScramble(
       TimerGetScrambleEvent event, Emitter<TimerState> emit) async {
-    final scramble = _getScrambleUseCase(ParamsEvent(state.event));
-    (await scramble).fold(
+    final scramble = await _getScrambleUseCase(ParamsEvent(state.event));
+    scramble.fold(
       (l) => null,
       (r) => emit(state.copyWith(scramble: r)),
     );
   }
 
   ///This method is called every time the program is started or when the [Event] is changed.
-  Future<void> _getAllResults(
-      TimerGetAllResultsEvent event, Emitter<TimerState> emit) async {
+  Future<void> _getAllResultsAndRecalculate(
+      TimerGetAllResultsAndRecalculateEvent event, Emitter<TimerState> emit) async {
     print("getAllResults");
     final results = await _getAllResultsUseCase(ParamsEvent(state.event));
     results.fold(
@@ -224,12 +225,14 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
           ParamsIndexedResult(updatedResult, event.index!));
 
       // if updated last solve (currentResult)
-      if (state.results.length - 1 == event.index && state.currentResult != null) {
+      if (state.results.length - 1 == event.index &&
+          state.currentResult != null) {
         var updatedTimeInMillis = updatedResult.timeInMillis;
         if (penalty) {
           updatedTimeInMillis += penaltyInMillis;
         }
-        emit(state.copyWith(currentResult: updatedResult, timeInMillis: updatedTimeInMillis));
+        emit(state.copyWith(
+            currentResult: updatedResult, timeInMillis: updatedTimeInMillis));
       }
 
       emit(
@@ -264,7 +267,8 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
           ParamsIndexedResult(updatedResult, event.index!));
 
       // if updated last solve (currentResult)
-      if (state.results.length - 1 == event.index && state.currentResult != null) {
+      if (state.results.length - 1 == event.index &&
+          state.currentResult != null) {
         emit(state.copyWith(currentResult: updatedResult));
       }
 
@@ -295,7 +299,8 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
       //deleting result from bottomSheet
       await _deleteResultUseCase(ParamsIndexedEvent(state.event, event.index!));
 
-      if (state.results.length - 1 == event.index) { // if deleted last solve (currentResult)
+      if (state.results.length - 1 == event.index) {
+        // if deleted last solve (currentResult)
         emit(state.copyWith(timeInMillis: 0).nullCurrentResult());
       }
 
@@ -380,6 +385,14 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
       (l) => null,
       (bestAvg) => emit(state.copyWith(bestAvgEntity: bestAvg)),
     );
+  }
+
+  ///This method changes event
+  Future<void> _changeEvent(
+      TimerChangeEvent event, Emitter<TimerState> emit) async {
+    emit(state.copyWith(event: event.event, timeInMillis: 0).nullCurrentResult());
+    add(TimerGetScrambleEvent());
+    add(TimerGetAllResultsAndRecalculateEvent());
   }
 
   ///This method starts the [SpeedcubingTimer] After 10 milliseconds, the update method is called

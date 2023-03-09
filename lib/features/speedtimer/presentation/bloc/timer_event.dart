@@ -29,7 +29,7 @@ class TimerGetScrambleEvent extends TimerEvent {}
 
 class TimerAppStartedEvent extends TimerEvent {}
 
-class TimerGetAllResultsEvent extends TimerEvent {}
+class TimerGetAllResultsAndRecalculateEvent extends TimerEvent {}
 
 class TimerPlus2Event extends TimerEvent {
   final int? index;
@@ -72,3 +72,9 @@ class TimerGetBestAvgEvent extends TimerEvent {
 class TimerCompareBestAvgEvent extends TimerEvent {}
 
 class TimerDeleteAllResultsEvent extends TimerEvent {}
+
+class TimerChangeEvent extends TimerEvent {
+  final Event event;
+
+  const TimerChangeEvent(this.event);
+}

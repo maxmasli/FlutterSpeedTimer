@@ -1,18 +1,6 @@
-// String millisToString(int? millis) {
-//   if (millis == null) return "DNF";
-//
-//   var hours = millis ~/ 3600000;
-//   var minutes = (millis % 3600000) ~/ 60000;
-//   var seconds = ((millis % 3600000) % 60000) ~/ 1000;
-//   var m = ((millis % 3600000) % 60000) % 1000;
-//
-//   var result = "";
-//   if(hours != 0) result += "${hours.toString().replaceFirst(RegExp(r'^0'), '')}:";
-//   if(hours != 0 || minutes != 0) result += "${minutes.toString().replaceFirst(RegExp(r'^0'), '')}:";
-//   if(hours != 0 || minutes != 0 || seconds != 0) result += "${seconds.toString().replaceFirst(RegExp(r'^0'), '')}.";
-//   result += m.toString().padLeft(3, '0');
-//   return result;
-// }
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:speedtimer_flutter/features/speedtimer/domain/entities/events.dart';
+import 'package:speedtimer_flutter/resources/resources.dart';
 
 String millisToString(int? millis) {
   if (millis == null) return "DNF";
@@ -71,3 +59,17 @@ String millisToString(int? millis) {
   return result;
 }
 
+String getSvgAssetByEvent(Event event) {
+  switch (event) {
+    case Event.cube222:
+      return Svgs.c222;
+    case Event.cube333:
+      return Svgs.c333;
+    case Event.pyraminx:
+      return Svgs.pyram;
+    case Event.skewb:
+      return Svgs.skewb;
+    case Event.clock:
+      return Svgs.clock;
+  }
+}
