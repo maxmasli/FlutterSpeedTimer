@@ -10,29 +10,19 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = PageController(
-      initialPage: 1,
-    );
+
     return BlocProvider(
       create: (context) => sl<TimerBloc>(),
       child: MaterialApp(
         home: SafeArea(
-          child: BlocBuilder<TimerBloc, TimerState>(
-            buildWhen: (prev, state) => prev.timerStateEnum != state.timerStateEnum,
-            builder: (context, state) {
-              return PageView(
-                physics: state.timerStateEnum ==
-                    TimerStateEnum.stop
-                    ? const AlwaysScrollableScrollPhysics()
-                    : const NeverScrollableScrollPhysics(),
-                controller: controller,
-                children: const [
-                  SettingsPage(),
-                  TimerPage(),
-                  ResultsPage(),
-                ],
-              );
-            },
+          child: PageView(
+            physics: const NeverScrollableScrollPhysics(),
+            controller: sl<PageController>(),
+            children: const [
+              SettingsPage(),
+              TimerPage(),
+              ResultsPage(),
+            ],
           ),
         ),
       ),

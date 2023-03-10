@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speedtimer_flutter/features/speedtimer/data/data_sources/avg_local_source.dart';
@@ -64,4 +65,9 @@ Future<void> init() async {
   //external
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton<SharedPreferences>(() => sharedPreferences);
+
+  final controller = PageController(
+    initialPage: 1,
+  );
+  sl.registerSingleton<PageController>(controller);
 }

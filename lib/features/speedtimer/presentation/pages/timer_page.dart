@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:speedtimer_flutter/core/utils/utils.dart';
+import 'package:speedtimer_flutter/di.dart';
 import 'package:speedtimer_flutter/features/speedtimer/presentation/bloc/timer_bloc.dart';
 import 'dart:math' as math;
 
@@ -27,6 +28,8 @@ class TimerPage extends StatelessWidget {
               TimerDNFButtonWidget(),
               TimerDeleteResultWidget(),
               TimerChangeEventButtonWidget(),
+              TimerResultsButtonWidget(),
+              TimerSettingsButtonWidget(),
             ],
           )
         ],
@@ -43,8 +46,8 @@ class TimerWidget extends StatelessWidget {
     final bloc = context.read<TimerBloc>();
     return Expanded(
       child: GestureDetector(
-        onTapDown: (_) => bloc.add(TimerOnTapDownEvent()),
-        onTapUp: (_) => bloc.add(TimerOnTapUpEvent()),
+        onPanDown: (_) => bloc.add(TimerOnTapDownEvent()),
+        onPanEnd: (_) => bloc.add(TimerOnTapUpEvent()),
         child: SizedBox(
           width: double.infinity,
           child: ColoredBox(
@@ -238,11 +241,46 @@ class TimerChangeEventButtonWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       onPressed: () {
-        showDialog(context: context, builder: (context) {
-          return ChangeEventDialog();
-        });
+        showDialog(
+            context: context,
+            builder: (context) {
+              return const ChangeEventDialog();
+            });
       },
       icon: const Icon(Icons.abc),
     );
   }
 }
+
+class TimerResultsButtonWidget extends StatelessWidget {
+  const TimerResultsButtonWidget({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () {
+        sl<PageController>().animateToPage(2,
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.ease);
+      },
+      child: const Text("results"),
+    );
+  }
+}
+class TimerSettingsButtonWidget extends StatelessWidget {
+  const TimerSettingsButtonWidget({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () {
+        sl<PageController>().animateToPage(0,
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.ease);
+      },
+      child: const Text("settings"),
+    );;
+  }
+}
+
+

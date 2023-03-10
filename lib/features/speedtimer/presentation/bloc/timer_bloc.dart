@@ -123,20 +123,21 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
   }
 
   ///method for start timer
-  void _timerStart(TimerStartEvent event, Emitter<TimerState> emit) {
-    Wakelock.enable(); // prevent screen from going into sleep mode
+  Future<void> _timerStart(
+      TimerStartEvent event, Emitter<TimerState> emit) async {
     emit(state.copyWith(timerStateEnum: TimerStateEnum.running));
     _startListeningTimer();
+    await Wakelock.enable(); // prevent screen from going into sleep mode
   }
 
   ///method for stop timer
   Future<void> _timerStop(
       TimerStopEvent event, Emitter<TimerState> emit) async {
-    Wakelock.disable(); // let screen to sleep
     emit(state.copyWith(timerStateEnum: TimerStateEnum.stop));
     _stopListeningTimer();
     add(const TimerSaveResultEvent(null));
     add(TimerGetScrambleEvent());
+    await Wakelock.disable(); // let screen to sleep
   }
 
   ///this method saves result. If resultEntity in [TimerSaveResultEvent] is null
@@ -180,7 +181,8 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
 
   ///This method is called every time the program is started or when the [Event] is changed.
   Future<void> _getAllResultsAndRecalculate(
-      TimerGetAllResultsAndRecalculateEvent event, Emitter<TimerState> emit) async {
+      TimerGetAllResultsAndRecalculateEvent event,
+      Emitter<TimerState> emit) async {
     print("getAllResults");
     final results = await _getAllResultsUseCase(ParamsEvent(state.event));
     results.fold(
@@ -390,15 +392,17 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
   ///This method changes event
   Future<void> _changeEvent(
       TimerChangeEvent event, Emitter<TimerState> emit) async {
-    emit(state.copyWith(event: event.event, timeInMillis: 0).nullCurrentResult());
+    emit(state
+        .copyWith(event: event.event, timeInMillis: 0)
+        .nullCurrentResult());
     add(TimerGetScrambleEvent());
     add(TimerGetAllResultsAndRecalculateEvent());
   }
 
-  ///This method starts the [SpeedcubingTimer] After 10 milliseconds, the update method is called
+  ///This method starts the [SpeedcubingTimer] After 13 milliseconds, the update method is called
   void _startListeningTimer() {
     _speedcubingTimer.startTimer();
-    _timer = Timer.periodic(const Duration(milliseconds: 10), (timer) {
+    _timer = Timer.periodic(const Duration(milliseconds: 13), (timer) {
       _updateTimer();
     });
   }

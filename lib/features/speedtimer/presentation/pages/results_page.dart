@@ -1,29 +1,32 @@
-import 'dart:async';
-
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:speedtimer_flutter/core/utils/utils.dart';
-import 'package:speedtimer_flutter/features/speedtimer/domain/entities/events.dart';
+import 'package:speedtimer_flutter/di.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/entities/result_entity.dart';
 import 'package:speedtimer_flutter/features/speedtimer/presentation/bloc/timer_bloc.dart';
 import 'package:speedtimer_flutter/features/speedtimer/presentation/widgets/result_bottom_sheet.dart';
-import 'package:speedtimer_flutter/resources/resources.dart';
 
 class ResultsPage extends StatelessWidget {
   const ResultsPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      body: Column(
-        children: const [
-          ResultsAppBarWidget(),
-          ResultsWidget(),
-        ],
+    return WillPopScope(
+      onWillPop: () async {
+        sl<PageController>().animateToPage(1,
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.ease);
+        return false;
+      },
+      child: Scaffold(
+        resizeToAvoidBottomInset: true,
+        body: Column(
+          children: const [
+            ResultsAppBarWidget(),
+            ResultsWidget(),
+          ],
+        ),
       ),
     );
   }
@@ -43,11 +46,11 @@ class ResultsAppBarWidget extends StatelessWidget {
         child: ColoredBox(
           color: Theme.of(context).primaryColor,
           child: Row(
-            children: [
-              const ResultsAvgWidget(),
-              const ResultsBestAvgWidget(),
-              const ResultsDeleteAllButtonWidget(),
-              const ResultEventImageWidget(),
+            children: const [
+              ResultsAvgWidget(),
+              ResultsBestAvgWidget(),
+              ResultsDeleteAllButtonWidget(),
+              ResultEventImageWidget(),
             ],
           ),
         ),
