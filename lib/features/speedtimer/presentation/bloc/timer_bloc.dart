@@ -14,6 +14,7 @@ import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/delete_r
 import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/get_all_results_use_case.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/get_avg_use_case.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/get_best_avg_use_case.dart';
+import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/get_best_sovle_use_case.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/get_scramble_use_case.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/params.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/save_result_use_case.dart';
@@ -35,6 +36,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
   final GetBestAvgUseCase _getBestAvgUseCase;
   final CompareBestAvgUseCase _compareBestAvgUseCase;
   final DeleteAllResultsUseCase _deleteAllResultsUseCase;
+  final GetBestSolveUseCase _getBestSolveUseCase;
 
   Timer? _timer;
   final _speedcubingTimer = SpeedcubingTimer();
@@ -50,6 +52,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     required GetBestAvgUseCase getBestAvgUseCase,
     required CompareBestAvgUseCase compareBestAvgUseCase,
     required DeleteAllResultsUseCase deleteAllResultsUseCase,
+    required GetBestSolveUseCase getBestSolveUseCase,
   })  : _saveResultUseCase = saveResultUseCase,
         _getAllResultsUseCase = getAllResultsUseCase,
         _getScrambleUseCase = getScrambleUseCase,
@@ -59,6 +62,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
         _getBestAvgUseCase = getBestAvgUseCase,
         _compareBestAvgUseCase = compareBestAvgUseCase,
         _deleteAllResultsUseCase = deleteAllResultsUseCase,
+        _getBestSolveUseCase = getBestSolveUseCase,
         super(const TimerState(
           event: Event.cube333,
           scramble: "",
@@ -69,6 +73,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
           bestAvgEntity:
               AvgEntity(avg5: null, avg12: null, avg50: null, avg100: null),
           settingsEntity: SettingsEntity(delay: 0),
+          bestSolve: null,
         )) {
     on<TimerAppStartedEvent>(_appStarted);
     on<TimerOnTapDownEvent>(_timerOnTapDown);
@@ -91,13 +96,13 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     on<TimerDeleteAllResultsEvent>(_deleteAllResults);
     on<TimerChangeEvent>(_changeEvent);
     on<TimerSetDelayEvent>(_setDelay);
+    on<TimerGetBestSolveEvent>(_getBestSolve);
   }
 
   ///this method calls when starting
   void _appStarted(TimerAppStartedEvent event, Emitter<TimerState> emit) {
     add(TimerGetScrambleEvent());
     add(TimerGetAllResultsAndRecalculateEvent());
-    //add(TimerRecountAvgEvent());
   }
 
   ///calls when finger tap down
@@ -195,6 +200,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     }
     add(TimerRecountAvgEvent());
     add(TimerCompareBestAvgEvent());
+    add(TimerGetBestSolveEvent());
   }
 
   ///the method receives the scramble and writes it to the state
@@ -218,9 +224,10 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
       (r) => emit(state.copyWith(results: r)),
     );
 
-    ///after geting all results
+    ///after getting all results
     add(TimerRecountAvgEvent());
     add(const TimerGetBestAvgEvent(false));
+    add(TimerGetBestSolveEvent());
   }
 
   ///this method sets the plus2 flag to true. If resultEntity is null then the flag is
@@ -271,6 +278,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
 
     add(TimerRecountAvgEvent());
     add(const TimerGetBestAvgEvent(true));
+    add(TimerGetBestSolveEvent());
   }
 
   ///this method sets the dnf flag to true. If resultEntity is null then the flag is
@@ -308,6 +316,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
 
     add(TimerRecountAvgEvent());
     add(const TimerGetBestAvgEvent(true));
+    add(TimerGetBestSolveEvent());
   }
 
   ///in this method if resultEntity is null
@@ -320,7 +329,8 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     if (event.resultEntity == null) {
       if (state.currentResult == null) return;
       final resultToDelete = state.currentResult!;
-      final results = state.results.toList()..removeAt(state.results.length - 1);
+      final results = state.results.toList()
+        ..removeAt(state.results.length - 1);
 
       await _deleteResultUseCase(
           ParamsIndexedResult(resultToDelete, state.results.length - 1));
@@ -343,6 +353,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
 
     add(TimerRecountAvgEvent());
     add(const TimerGetBestAvgEvent(true));
+    add(TimerGetBestSolveEvent());
   }
 
   ///this method delete all results
@@ -353,6 +364,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     emit(state.copyWith(results: [], currentResult: null, timeInMillis: 0));
     add(TimerRecountAvgEvent());
     add(const TimerGetBestAvgEvent(true));
+    add(TimerGetBestSolveEvent());
   }
 
   ///this method recalculates the average time and writes it to the state
@@ -400,7 +412,6 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
       (l) => null,
       (bestAvg) {
         emit(state.copyWith(bestAvgEntity: bestAvg));
-        print(bestAvg);
       },
     );
   }
@@ -414,6 +425,23 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     bestAvg.fold(
       (l) => null,
       (bestAvg) => emit(state.copyWith(bestAvgEntity: bestAvg)),
+    );
+  }
+
+  ///This method get best solve
+  void _getBestSolve(
+      TimerGetBestSolveEvent event, Emitter<TimerState> emit) async {
+    final bestSolve =
+        await _getBestSolveUseCase(ParamsListResult(state.results));
+    bestSolve.fold(
+      (l) => null,
+      (bestSolve) {
+        if (bestSolve == null) {
+          emit(state.nullBestSolve());
+        } else {
+          emit(state.copyWith(bestSolve: bestSolve));
+        }
+      },
     );
   }
 
@@ -451,7 +479,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     _timer?.cancel();
   }
 
-  ///This method updates the current time state every 10 milliseconds
+  ///This method updates the current time state every 13 milliseconds
   void _updateTimer() {
     emit(state.copyWith(timeInMillis: _speedcubingTimer.getTime()));
   }

@@ -29,7 +29,8 @@ class AvgRepositoryImpl implements AvgRepository {
   Future<Either<Failure, AvgEntity>> getBestAvg(
       Event event, List<ResultEntity> results, bool forceRecount) async {
     final avg = await avgLocalSource.getBestAvg(event);
-    if (avg != null && !forceRecount) { /// if (avg != null && !forceRecount)
+    if (avg != null && !forceRecount) {
+      /// if (avg != null && !forceRecount)
       return Right(avg.mapToEntity());
     } else {
       final bestAvg = avgLocalSource.calculateBestAvg(
@@ -44,7 +45,19 @@ class AvgRepositoryImpl implements AvgRepository {
       AvgEntity a, AvgEntity b, Event event) async {
     final bestAvg = (await avgLocalSource.compareBestAvg(
         AvgModel.mapFromEntity(a), AvgModel.mapFromEntity(b), event));
-    avgLocalSource.saveBestAvg(event, bestAvg);
+    await avgLocalSource.saveBestAvg(event, bestAvg);
     return Right(bestAvg.mapToEntity());
+  }
+
+  @override
+  Future<Either<Failure, ResultEntity?>> getBestSolve(
+      List<ResultEntity> results) async {
+    final bestSolve = avgLocalSource.getBestSolve(
+        results.map((result) => ResultModel.mapFromEntity(result)).toList());
+    if (bestSolve != null) {
+      return Right(bestSolve.mapToEntity());
+    } else {
+      return const Right(null);
+    }
   }
 }

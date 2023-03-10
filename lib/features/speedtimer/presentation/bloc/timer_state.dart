@@ -14,6 +14,7 @@ class TimerState extends Equatable {
   final AvgEntity bestAvgEntity;
   final bool isLoading;
   final SettingsEntity settingsEntity;
+  final ResultEntity? bestSolve;
 
   const TimerState(
       {this.currentResult,
@@ -26,6 +27,7 @@ class TimerState extends Equatable {
       required this.avgEntity,
       required this.bestAvgEntity,
       required this.settingsEntity,
+      required this.bestSolve,
       this.isLoading = false});
 
   TimerState copyWith({
@@ -39,6 +41,7 @@ class TimerState extends Equatable {
     AvgEntity? avgEntity,
     AvgEntity? bestAvgEntity,
     SettingsEntity? settingsEntity,
+    ResultEntity? bestSolve,
     bool? isLoading = false,
   }) {
     return TimerState(
@@ -52,6 +55,7 @@ class TimerState extends Equatable {
       avgEntity: avgEntity ?? this.avgEntity,
       bestAvgEntity: bestAvgEntity ?? this.bestAvgEntity,
       settingsEntity: settingsEntity ?? this.settingsEntity,
+      bestSolve: bestSolve ?? this.bestSolve,
       isLoading: isLoading ?? this.isLoading,
     );
   }
@@ -68,14 +72,15 @@ class TimerState extends Equatable {
       avgEntity: avgEntity,
       bestAvgEntity: bestAvgEntity,
       settingsEntity: settingsEntity,
+      bestSolve: bestSolve,
       isLoading: isLoading,
     );
   }
 
-  TimerState nullBottomSheetResult() {
+  TimerState nullBestSolve() {
     return TimerState(
       currentResult: currentResult,
-      resultInBottomSheet: null,
+      resultInBottomSheet: resultInBottomSheet,
       results: results,
       event: event,
       scramble: scramble,
@@ -84,6 +89,7 @@ class TimerState extends Equatable {
       avgEntity: avgEntity,
       bestAvgEntity: bestAvgEntity,
       settingsEntity: settingsEntity,
+      bestSolve: null,
       isLoading: isLoading,
     );
   }
@@ -101,5 +107,6 @@ class TimerState extends Equatable {
         bestAvgEntity,
         settingsEntity,
         isLoading,
+        bestSolve,
       ];
 }

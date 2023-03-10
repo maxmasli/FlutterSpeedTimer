@@ -16,6 +16,7 @@ import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/delete_r
 import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/get_all_results_use_case.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/get_avg_use_case.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/get_best_avg_use_case.dart';
+import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/get_best_sovle_use_case.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/get_scramble_use_case.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/save_result_use_case.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/update_result_use_case.dart';
@@ -34,7 +35,8 @@ Future<void> init() async {
         getAvgUseCase: sl(),
         getBestAvgUseCase: sl(),
         compareBestAvgUseCase: sl(),
-    deleteAllResultsUseCase: sl(),
+        deleteAllResultsUseCase: sl(),
+    getBestSolveUseCase: sl(),
       )..add(TimerAppStartedEvent()));
 
   //use cases
@@ -46,7 +48,9 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetAvgUseCase(avgRepository: sl()));
   sl.registerLazySingleton(() => GetBestAvgUseCase(avgRepository: sl()));
   sl.registerLazySingleton(() => CompareBestAvgUseCase(avgRepository: sl()));
-  sl.registerLazySingleton(() => DeleteAllResultsUseCase(resultRepository: sl()));
+  sl.registerLazySingleton(() => GetBestSolveUseCase(avgRepository: sl()));
+  sl.registerLazySingleton(
+      () => DeleteAllResultsUseCase(resultRepository: sl()));
 
   //repository
   sl.registerLazySingleton<ResultRepository>(() => ResultRepositoryImpl(sl()));

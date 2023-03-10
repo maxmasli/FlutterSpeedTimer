@@ -130,6 +130,7 @@ class TimerBestAvgWidget extends StatelessWidget {
             Text("Best avg of 12: ${state.bestAvgEntity.stringAvg12}"),
             Text("Best avg of 50: ${state.bestAvgEntity.stringAvg50}"),
             Text("Best avg of 100: ${state.bestAvgEntity.stringAvg100}"),
+            Text("Best solve: ${state.bestSolve?.stringTime ?? "DNF"}"),
           ],
         );
       },

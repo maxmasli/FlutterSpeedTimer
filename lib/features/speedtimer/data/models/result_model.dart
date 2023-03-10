@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:speedtimer_flutter/core/utils/consts.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/entities/events.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/entities/result_entity.dart';
 
@@ -36,6 +37,16 @@ class ResultModel extends Equatable {
       required this.event,
       required this.description,
       required this.uuid});
+
+  int? get time {
+    if (isDNF) {
+      return null;
+    }
+    if (isPlus2) {
+      return timeInMillis + penaltyInMillis;
+    }
+    return timeInMillis;
+  }
 
   ResultEntity mapToEntity() {
     return ResultEntity(

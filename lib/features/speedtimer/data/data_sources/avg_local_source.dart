@@ -1,14 +1,11 @@
 import 'dart:convert';
-
 import 'dart:math';
 
-import 'package:dartz/dartz.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:speedtimer_flutter/core/error/failure.dart';
 import 'package:speedtimer_flutter/features/speedtimer/data/models/avg_model.dart';
 import 'package:speedtimer_flutter/features/speedtimer/data/models/result_model.dart';
-import 'package:speedtimer_flutter/features/speedtimer/domain/entities/avg_entity.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/entities/events.dart';
+import 'package:speedtimer_flutter/features/speedtimer/domain/entities/result_entity.dart';
 
 abstract class AvgLocalSource {
   Future<AvgModel> getAvg(List<ResultModel> results);
@@ -20,6 +17,8 @@ abstract class AvgLocalSource {
   Future<void> saveBestAvg(Event event, AvgModel bestAvg);
 
   Future<AvgModel> compareBestAvg(AvgModel a, AvgModel b, Event event);
+
+  ResultModel? getBestSolve(List<ResultModel> results);
 }
 
 class AvgLocalSourceImpl implements AvgLocalSource {
@@ -148,6 +147,25 @@ class AvgLocalSourceImpl implements AvgLocalSource {
         avg5: bestAvg5, avg12: bestAvg12, avg50: bestAvg50, avg100: bestAvg100);
 
     return Future.value(bestAvg);
+  }
+
+  @override
+  ResultModel? getBestSolve(List<ResultModel> results) {
+    if (results.isEmpty) return null;
+    ResultModel bestResult = results[0];
+    for (final result in results) {
+      if (bestResult.time == null) {
+        bestResult = result;
+        continue;
+      }
+      if (result.time == null) {
+        continue;
+      }
+      if (bestResult.time! > result.time!) {
+        bestResult = result;
+      }
+    }
+    return bestResult;
   }
 
   int? _bestResult(int? a, int? b) {

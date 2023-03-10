@@ -8,4 +8,5 @@ abstract class AvgRepository {
   Future<Either<Failure, AvgEntity>> getAvg(List<ResultEntity> results);
   Future<Either<Failure, AvgEntity>> getBestAvg(Event event, List<ResultEntity> results, bool forceRecount);
   Future<Either<Failure, AvgEntity>> compareBestAvg(AvgEntity a, AvgEntity b, Event event);
+  Future<Either<Failure, ResultEntity?>> getBestSolve(List<ResultEntity> results);
 }

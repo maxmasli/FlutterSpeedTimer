@@ -31,12 +31,6 @@ class TimerAppStartedEvent extends TimerEvent {}
 
 class TimerGetAllResultsAndRecalculateEvent extends TimerEvent {}
 
-// class TimerPlus2Event extends TimerEvent {
-//   final int? index;
-//
-//   const TimerPlus2Event(this.index);
-// }
-
 class TimerPlus2Event extends TimerEvent {
   final ResultEntity? resultEntity;
 
@@ -90,3 +84,5 @@ class TimerSetDelayEvent extends TimerEvent {
 
   const TimerSetDelayEvent(this.delay);
 }
+
+class TimerGetBestSolveEvent extends TimerEvent {}
