@@ -11,6 +11,7 @@ class ResultEntity extends Equatable {
   final Event event;
   final String description;
 
+
   const ResultEntity({required this.timeInMillis,
     required this.scramble,
     required this.isPlus2,

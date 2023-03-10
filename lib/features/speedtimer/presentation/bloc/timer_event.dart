@@ -78,3 +78,9 @@ class TimerChangeEvent extends TimerEvent {
 
   const TimerChangeEvent(this.event);
 }
+
+class TimerSetDelayEvent extends TimerEvent {
+  final double delay;
+
+  const TimerSetDelayEvent(this.delay);
+}

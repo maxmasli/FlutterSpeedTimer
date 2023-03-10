@@ -19,7 +19,7 @@ abstract class AvgLocalSource {
 
   Future<void> saveBestAvg(Event event, AvgModel bestAvg);
 
-  Future<AvgModel> compareBestAvgAndSave(AvgModel a, AvgModel b, Event event);
+  Future<AvgModel> compareBestAvg(AvgModel a, AvgModel b, Event event);
 }
 
 class AvgLocalSourceImpl implements AvgLocalSource {
@@ -138,7 +138,7 @@ class AvgLocalSourceImpl implements AvgLocalSource {
   }
 
   @override
-  Future<AvgModel> compareBestAvgAndSave(
+  Future<AvgModel> compareBestAvg(
       AvgModel a, AvgModel b, Event event) async {
     int? bestAvg5 = _bestResult(a.avg5, b.avg5);
     int? bestAvg12 = _bestResult(a.avg12, b.avg12);
@@ -146,8 +146,6 @@ class AvgLocalSourceImpl implements AvgLocalSource {
     int? bestAvg100 = _bestResult(a.avg100, b.avg100);
     final bestAvg = AvgModel(
         avg5: bestAvg5, avg12: bestAvg12, avg50: bestAvg50, avg100: bestAvg100);
-
-    await saveBestAvg(event, bestAvg);
 
     return Future.value(bestAvg);
   }

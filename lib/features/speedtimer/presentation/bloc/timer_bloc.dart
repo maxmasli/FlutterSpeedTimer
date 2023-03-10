@@ -7,6 +7,7 @@ import 'package:speedtimer_flutter/core/utils/speedcubing_timer.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/entities/avg_entity.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/entities/events.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/entities/result_entity.dart';
+import 'package:speedtimer_flutter/features/speedtimer/domain/entities/settings_entity.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/compare_best_avg_use_case.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/delete_all_results_use_case.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/delete_result_use_case.dart';
@@ -36,6 +37,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
 
   Timer? _timer;
   final _speedcubingTimer = SpeedcubingTimer();
+  Timer? _delayTimer;
 
   TimerBloc({
     required SaveResultUseCase saveResultUseCase,
@@ -65,6 +67,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
               AvgEntity(avg5: null, avg12: null, avg50: null, avg100: null),
           bestAvgEntity:
               AvgEntity(avg5: null, avg12: null, avg50: null, avg100: null),
+          settingsEntity: SettingsEntity(delay: 0),
         )) {
     on<TimerAppStartedEvent>(_appStarted);
     on<TimerOnTapDownEvent>(_timerOnTapDown);
@@ -86,6 +89,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     on<TimerCompareBestAvgEvent>(_compareBestAvg);
     on<TimerDeleteAllResultsEvent>(_deleteAllResults);
     on<TimerChangeEvent>(_changeEvent);
+    on<TimerSetDelayEvent>(_setDelay);
   }
 
   ///this method calls when starting
@@ -97,6 +101,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
 
   ///calls when finger tap down
   void _timerOnTapDown(TimerOnTapDownEvent event, Emitter<TimerState> emit) {
+    print(state.timerStateEnum);
     if (state.timerStateEnum == TimerStateEnum.stop) {
       add(TimerPressedEvent());
     } else if (state.timerStateEnum == TimerStateEnum.running) {
@@ -105,21 +110,42 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
   }
 
   ///calls when finger tap up
+  ///when _delayTimer != null _delayTimer will cancel. It means if your delay in
+  ///[SettingsEntity] != 0 and you put finger and remove from screen, but delay
+  ///time is not finish, the _delayTimer are destroyed and solve are not counting
   void _timerOnTapUp(TimerOnTapUpEvent event, Emitter<TimerState> emit) {
+    print(state.timerStateEnum);
     if (state.timerStateEnum == TimerStateEnum.readyToStart) {
       add(TimerStartEvent());
+    } else {
+      if (_delayTimer != null) {
+        _delayTimer!.cancel();
+        _delayTimer == null;
+        emit(state.copyWith(timerStateEnum: TimerStateEnum.stop));
+      }
     }
   }
 
   ///calls when finger on the screen
+  ///when state.settingsEntity.delay != 0 the _delayTimer is calling
   void _timerPressed(TimerPressedEvent event, Emitter<TimerState> emit) {
     emit(state.copyWith(timerStateEnum: TimerStateEnum.pressed));
-    add(TimerReadyEvent());
+    if (state.settingsEntity.delay != 0) {
+      _delayTimer = Timer(
+          Duration(milliseconds: (state.settingsEntity.delay * 1000).toInt()),
+          () {
+        add(TimerReadyEvent());
+      });
+    } else {
+      add(TimerReadyEvent());
+    }
   }
 
   ///calls then timer is ready
   void _timerReady(TimerReadyEvent event, Emitter<TimerState> emit) {
-    emit(state.copyWith(timerStateEnum: TimerStateEnum.readyToStart));
+    if (state.timerStateEnum == TimerStateEnum.pressed) {
+      emit(state.copyWith(timerStateEnum: TimerStateEnum.readyToStart));
+    }
   }
 
   ///method for start timer
@@ -397,6 +423,16 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
         .nullCurrentResult());
     add(TimerGetScrambleEvent());
     add(TimerGetAllResultsAndRecalculateEvent());
+  }
+
+  ///this method set delay
+  Future<void> _setDelay(
+      TimerSetDelayEvent event, Emitter<TimerState> emit) async {
+    emit(
+      state.copyWith(
+        settingsEntity: state.settingsEntity.copyWith(delay: event.delay),
+      ),
+    );
   }
 
   ///This method starts the [SpeedcubingTimer] After 13 milliseconds, the update method is called

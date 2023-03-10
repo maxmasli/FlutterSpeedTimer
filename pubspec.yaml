@@ -21,6 +21,7 @@ dependencies:
   wakelock: ^0.6.2
   shared_preferences: ^2.0.18
   flutter_svg: ^2.0.2
+  uuid: ^3.0.7
 
   cupertino_icons: ^1.0.2
 

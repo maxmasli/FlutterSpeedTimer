@@ -42,8 +42,9 @@ class AvgRepositoryImpl implements AvgRepository {
   @override
   Future<Either<Failure, AvgEntity>> compareBestAvg(
       AvgEntity a, AvgEntity b, Event event) async {
-    return Right((await avgLocalSource.compareBestAvgAndSave(
-            AvgModel.mapFromEntity(a), AvgModel.mapFromEntity(b), event))
-        .mapToEntity());
+    final bestAvg = (await avgLocalSource.compareBestAvg(
+        AvgModel.mapFromEntity(a), AvgModel.mapFromEntity(b), event));
+    avgLocalSource.saveBestAvg(event, bestAvg);
+    return Right(bestAvg.mapToEntity());
   }
 }

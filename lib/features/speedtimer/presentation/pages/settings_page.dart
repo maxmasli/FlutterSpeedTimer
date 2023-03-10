@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:speedtimer_flutter/di.dart';
+import 'package:speedtimer_flutter/features/speedtimer/presentation/widgets/press_delay_dialog.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({Key? key}) : super(key: key);
@@ -13,9 +14,21 @@ class SettingsPage extends StatelessWidget {
             curve: Curves.ease);
         return false;
       },
-      child: Center(
-        child: Text("settings page"),
-      ),
+      child: Scaffold(
+        body: ListView(
+          children: [
+            ListTile(
+              title: Text("Press delay"),
+              subtitle: Text("subtitle"),
+              onTap: () {
+                showDialog(context: context, builder: (_) {
+                  return PressDelayDialog();
+                });
+              },
+            )
+          ],
+        ),
+      )
     );
   }
 }

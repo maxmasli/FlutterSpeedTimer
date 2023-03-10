@@ -260,13 +260,13 @@ class TimerResultsButtonWidget extends StatelessWidget {
     return ElevatedButton(
       onPressed: () {
         sl<PageController>().animateToPage(2,
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.ease);
+            duration: const Duration(milliseconds: 200), curve: Curves.ease);
       },
       child: const Text("results"),
     );
   }
 }
+
 class TimerSettingsButtonWidget extends StatelessWidget {
   const TimerSettingsButtonWidget({Key? key}) : super(key: key);
 
@@ -275,12 +275,10 @@ class TimerSettingsButtonWidget extends StatelessWidget {
     return ElevatedButton(
       onPressed: () {
         sl<PageController>().animateToPage(0,
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.ease);
+            duration: const Duration(milliseconds: 200), curve: Curves.ease);
       },
       child: const Text("settings"),
-    );;
+    );
+    ;
   }
 }
-
-
