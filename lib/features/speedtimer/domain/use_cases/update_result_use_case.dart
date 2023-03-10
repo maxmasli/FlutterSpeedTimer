@@ -13,7 +13,7 @@ class UpdateResultUseCase extends UseCase<ResultEntity, ParamsIndexedResult> {
 
   @override
   Future<Either<Failure, ResultEntity>> call(ParamsIndexedResult params) async {
-    return await resultRepository.updateResult(params.resultEntity, params.index);
+    return await resultRepository.updateResult(
+        params.resultEntity, params.index);
   }
-
 }

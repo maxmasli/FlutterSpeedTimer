@@ -18,7 +18,7 @@ import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/get_avg_
 import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/get_best_avg_use_case.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/get_scramble_use_case.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/save_result_use_case.dart';
-import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/update_last_result_use_case.dart';
+import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/update_result_use_case.dart';
 import 'package:speedtimer_flutter/features/speedtimer/presentation/bloc/timer_bloc.dart';
 
 final sl = GetIt.instance;

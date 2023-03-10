@@ -25,12 +25,17 @@ class ResultModel extends Equatable {
   @HiveField(5)
   final String description;
 
-  const ResultModel({required this.timeInMillis,
-    required this.scramble,
-    required this.isPlus2,
-    required this.isDNF,
-    required this.event,
-    required this.description});
+  @HiveField(6)
+  final String uuid;
+
+  const ResultModel(
+      {required this.timeInMillis,
+      required this.scramble,
+      required this.isPlus2,
+      required this.isDNF,
+      required this.event,
+      required this.description,
+      required this.uuid});
 
   ResultEntity mapToEntity() {
     return ResultEntity(
@@ -40,10 +45,9 @@ class ResultModel extends Equatable {
       isDNF: isDNF,
       event: event,
       description: description,
+      uuid: uuid,
     );
   }
-
-
 
   factory ResultModel.mapFromEntity(ResultEntity resultEntity) {
     return ResultModel(
@@ -53,9 +57,11 @@ class ResultModel extends Equatable {
       scramble: resultEntity.scramble,
       event: resultEntity.event,
       isDNF: resultEntity.isDNF,
+      uuid: resultEntity.uuid,
     );
   }
 
   @override
-  List<Object> get props => [timeInMillis, scramble, isPlus2, isDNF, event, description];
+  List<Object> get props =>
+      [timeInMillis, scramble, isPlus2, isDNF, event, description, uuid];
 }

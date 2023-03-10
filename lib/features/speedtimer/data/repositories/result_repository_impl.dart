@@ -25,22 +25,45 @@ class ResultRepositoryImpl implements ResultRepository {
 
   @override
   Future<Either<Failure, ResultEntity>> saveResult(ResultEntity resultEntity) async {
-    final savedResult = await resultLocalDataSource.saveResult(ResultModel.mapFromEntity(resultEntity));
-    return Right(savedResult.mapToEntity());
-  }
-
-  @override
-  Future<Either<Failure, ResultEntity>> updateResult(ResultEntity resultEntity, int index) async {
-    final savedResult = await resultLocalDataSource.updateResult(ResultModel.mapFromEntity(resultEntity), index);
-    return Right(savedResult.mapToEntity());
-  }
-
-  @override
-  Future<Either<Failure, ResultEntity>> deleteResult(Event event, int index) async {
     try {
-      final deletedResult = await resultLocalDataSource.deleteResult(
-          event, index);
-      return Right(deletedResult.mapToEntity());
+      final savedResult = await resultLocalDataSource.saveResult(ResultModel.mapFromEntity(resultEntity));
+      return Right(savedResult.mapToEntity());
+    } on HiveException {
+      return Left(HiveFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, ResultEntity>> updateResult(ResultEntity resultEntity, [int? index]) async {
+    try {
+      if (index != null) {
+        final savedResult = await resultLocalDataSource.updateResult(
+            ResultModel.mapFromEntity(resultEntity), index);
+        return Right(savedResult.mapToEntity());
+      } else {
+        final savedResult = await resultLocalDataSource.updateResultById(
+            ResultModel.mapFromEntity(resultEntity));
+        return Right(savedResult.mapToEntity());
+      }
+    } on HiveException {
+      return Left(HiveFailure());
+    }
+
+  }
+
+  @override
+  Future<Either<Failure, ResultEntity>> deleteResult(ResultEntity resultEntity, [int? index]) async {
+    try {
+      if (index != null) {
+        final deletedResult = await resultLocalDataSource.deleteResult(
+            ResultModel.mapFromEntity(resultEntity), index);
+        return Right(deletedResult.mapToEntity());
+      } else {
+        final deletedResult = await resultLocalDataSource.deleteResultById(
+            ResultModel.mapFromEntity(resultEntity));
+        return Right(deletedResult.mapToEntity());
+      }
+
     } on HiveException {
       return Left(HiveFailure());
     }
@@ -51,4 +74,6 @@ class ResultRepositoryImpl implements ResultRepository {
     await resultLocalDataSource.deleteAllResults(event);
     return const Right(null);
   }
+
+
 }

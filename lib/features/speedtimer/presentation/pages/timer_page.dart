@@ -173,7 +173,7 @@ class TimerPlus2ButtonWidget extends StatelessWidget {
         }
         return ElevatedButton(
           onPressed: () {
-            bloc.add(const TimerPlus2Event(null));
+            bloc.add(const TimerPlus2Event());
           },
           style: ButtonStyle(
             backgroundColor: MaterialStateProperty.all(backgroundColor),
@@ -204,7 +204,7 @@ class TimerDNFButtonWidget extends StatelessWidget {
         }
         return ElevatedButton(
           onPressed: () {
-            bloc.add(const TimerDNFEvent(null));
+            bloc.add(const TimerDNFEvent());
           },
           style: ButtonStyle(
             backgroundColor: MaterialStateProperty.all(backgroundColor),
@@ -227,7 +227,7 @@ class TimerDeleteResultWidget extends StatelessWidget {
     final bloc = context.read<TimerBloc>();
     return IconButton(
       onPressed: () {
-        bloc.add(const TimerDeleteResultEvent(null));
+        bloc.add(const TimerDeleteResultEvent());
       },
       icon: const Icon(Icons.delete),
     );

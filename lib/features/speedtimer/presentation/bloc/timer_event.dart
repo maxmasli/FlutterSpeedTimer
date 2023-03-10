@@ -31,22 +31,28 @@ class TimerAppStartedEvent extends TimerEvent {}
 
 class TimerGetAllResultsAndRecalculateEvent extends TimerEvent {}
 
-class TimerPlus2Event extends TimerEvent {
-  final int? index;
+// class TimerPlus2Event extends TimerEvent {
+//   final int? index;
+//
+//   const TimerPlus2Event(this.index);
+// }
 
-  const TimerPlus2Event(this.index);
+class TimerPlus2Event extends TimerEvent {
+  final ResultEntity? resultEntity;
+
+  const TimerPlus2Event([this.resultEntity]);
 }
 
 class TimerDNFEvent extends TimerEvent {
-  final int? index;
+  final ResultEntity? resultEntity;
 
-  const TimerDNFEvent(this.index);
+  const TimerDNFEvent([this.resultEntity]);
 }
 
 class TimerDeleteResultEvent extends TimerEvent{
-  final int? index;
+  final ResultEntity? resultEntity;
 
-  const TimerDeleteResultEvent(this.index);
+  const TimerDeleteResultEvent([this.resultEntity]);
 }
 
 class TimerAddResultBottomSheet extends TimerEvent {

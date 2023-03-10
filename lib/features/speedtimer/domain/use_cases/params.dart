@@ -21,9 +21,9 @@ class ParamsIndexedEvent extends ParamsEvent {
 }
 
 class ParamsIndexedResult extends ParamsResult {
-  final int index;
+  final int? index;
 
-  ParamsIndexedResult(super.resultEntity, this.index);
+  ParamsIndexedResult(super.resultEntity, [this.index]);
 }
 
 class ParamsListResult {

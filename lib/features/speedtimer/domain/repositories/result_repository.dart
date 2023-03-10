@@ -8,9 +8,9 @@ abstract class ResultRepository {
 
   Future<Either<Failure, ResultEntity>> saveResult(ResultEntity resultEntity);
 
-  Future<Either<Failure, ResultEntity>> updateResult(ResultEntity resultEntity, int index);
+  Future<Either<Failure, ResultEntity>> updateResult(ResultEntity resultEntity, [int? index]);
 
-  Future<Either<Failure, ResultEntity>> deleteResult(Event event, int index);
+  Future<Either<Failure, ResultEntity>> deleteResult(ResultEntity resultEntity, [int? index]);
 
   Future<Either<Failure, void>> deleteAllResults(Event event);
 }

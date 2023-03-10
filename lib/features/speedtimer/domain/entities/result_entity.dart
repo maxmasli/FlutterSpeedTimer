@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:speedtimer_flutter/core/utils/consts.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/entities/events.dart';
 import 'package:speedtimer_flutter/core/utils/utils.dart';
+import 'package:uuid/uuid.dart';
 
 class ResultEntity extends Equatable {
   final int timeInMillis;
@@ -10,14 +11,17 @@ class ResultEntity extends Equatable {
   final bool isDNF;
   final Event event;
   final String description;
+  final String uuid;
 
-
-  const ResultEntity({required this.timeInMillis,
+  const ResultEntity({
+    required this.timeInMillis,
     required this.scramble,
     required this.isPlus2,
     required this.isDNF,
     required this.event,
-    required this.description});
+    required this.description,
+    required this.uuid,
+  });
 
   int? get time {
     if (isDNF) {
@@ -40,6 +44,7 @@ class ResultEntity extends Equatable {
     bool? isDNF,
     Event? event,
     String? description,
+    String? uuid,
   }) {
     return ResultEntity(
       timeInMillis: timeInMillis ?? this.timeInMillis,
@@ -48,12 +53,11 @@ class ResultEntity extends Equatable {
       isDNF: isDNF ?? this.isDNF,
       event: event ?? this.event,
       description: description ?? this.description,
+      uuid: uuid ?? this.uuid,
     );
   }
 
   @override
   List<Object> get props =>
-      [timeInMillis, scramble, isPlus2, isDNF, event, description];
-
-
+      [timeInMillis, scramble, isPlus2, isDNF, event, description, uuid];
 }

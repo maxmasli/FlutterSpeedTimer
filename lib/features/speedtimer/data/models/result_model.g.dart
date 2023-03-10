@@ -23,13 +23,14 @@ class ResultModelAdapter extends TypeAdapter<ResultModel> {
       isDNF: fields[3] as bool,
       event: fields[4] as Event,
       description: fields[5] as String,
+      uuid: fields[6] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, ResultModel obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(7)
       ..writeByte(0)
       ..write(obj.timeInMillis)
       ..writeByte(1)
@@ -41,7 +42,9 @@ class ResultModelAdapter extends TypeAdapter<ResultModel> {
       ..writeByte(4)
       ..write(obj.event)
       ..writeByte(5)
-      ..write(obj.description);
+      ..write(obj.description)
+      ..writeByte(6)
+      ..write(obj.uuid);
   }
 
   @override
@@ -50,7 +53,7 @@ class ResultModelAdapter extends TypeAdapter<ResultModel> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is ResultModelAdapter &&
-          runtimeType == other.runtimeType &&
-          typeId == other.typeId;
+          other is ResultModelAdapter &&
+              runtimeType == other.runtimeType &&
+              typeId == other.typeId;
 }

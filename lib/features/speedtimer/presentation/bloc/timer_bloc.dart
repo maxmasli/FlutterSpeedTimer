@@ -17,7 +17,8 @@ import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/get_best
 import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/get_scramble_use_case.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/params.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/save_result_use_case.dart';
-import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/update_last_result_use_case.dart';
+import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/update_result_use_case.dart';
+import 'package:uuid/uuid.dart';
 import 'package:wakelock/wakelock.dart';
 
 part 'timer_event.dart';
@@ -174,6 +175,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
       TimerSaveResultEvent event, Emitter<TimerState> emit) async {
     if (event.resultEntity == null) {
       final resultEntity = ResultEntity(
+          uuid: const Uuid().v4(),
           timeInMillis: state.timeInMillis,
           scramble: state.scramble,
           isPlus2: false,
@@ -221,15 +223,14 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     add(const TimerGetBestAvgEvent(false));
   }
 
-  ///this method sets the plus2 flag to true. If index is null or or index equals
-  ///the last result index, then the flag is
+  ///this method sets the plus2 flag to true. If resultEntity is null then the flag is
   ///overwritten in the current result, if not, then the flag is overwritten in
-  ///the results list by index
+  ///the results list
   ///After the operation, [TimerRecountAvgEvent] and [TimerGetBestAvgEvent] are called
   Future<void> _setPlus2(
       TimerPlus2Event event, Emitter<TimerState> emit) async {
-    if (event.index == null) {
-      // update last/current result
+    if (event.resultEntity == null) {
+      //updating last/current result
       if (state.currentResult == null) return;
       final penalty = !state.currentResult!.isPlus2;
       final updatedResult = state.currentResult!.copyWith(isPlus2: penalty);
@@ -237,24 +238,21 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
       if (penalty) {
         updatedTimeInMillis += penaltyInMillis;
       }
-
-      await _updateResultUseCase(
-          ParamsIndexedResult(updatedResult, state.results.length - 1));
       state.results.last = updatedResult;
       emit(state.copyWith(
           currentResult: updatedResult, timeInMillis: updatedTimeInMillis));
-    } else {
-      // in bottom sheet
-      final penalty = !state.resultInBottomSheet!.isPlus2;
-      final updatedResult =
-          state.resultInBottomSheet!.copyWith(isPlus2: penalty);
-      final results = state.results..[event.index!] = updatedResult;
-      await _updateResultUseCase(
-          ParamsIndexedResult(updatedResult, event.index!));
 
-      // if updated last solve (currentResult)
-      if (state.results.length - 1 == event.index &&
-          state.currentResult != null) {
+      await _updateResultUseCase(
+          ParamsIndexedResult(updatedResult, state.results.length - 1));
+    } else {
+      final penalty = !event.resultEntity!.isPlus2;
+      final updatedResult = event.resultEntity!.copyWith(isPlus2: penalty);
+      final index = state.results.toList().indexOf(event.resultEntity!);
+      final updatedResultsList = state.results.toList()
+        ..[index] = updatedResult;
+
+      if (state.results.length - 1 == index) {
+        //updated last result
         var updatedTimeInMillis = updatedResult.timeInMillis;
         if (penalty) {
           updatedTimeInMillis += penaltyInMillis;
@@ -263,79 +261,84 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
             currentResult: updatedResult, timeInMillis: updatedTimeInMillis));
       }
 
-      emit(
-          state.copyWith(resultInBottomSheet: updatedResult, results: results));
+      emit(state.copyWith(
+        results: updatedResultsList,
+        resultInBottomSheet: updatedResult,
+      ));
+
+      await _updateResultUseCase(ParamsIndexedResult(updatedResult));
     }
 
     add(TimerRecountAvgEvent());
     add(const TimerGetBestAvgEvent(true));
   }
 
-  ///this method sets the dnf flag to true. If index is null or index equals the
-  ///last result index, then the flag is
+  ///this method sets the dnf flag to true. If resultEntity is null then the flag is
   ///overwritten in the current result, if not, then the flag is overwritten in
-  ///the results list by index
+  ///the results list
   ///After the operation, [TimerRecountAvgEvent] and [TimerGetBestAvgEvent] are called
   Future<void> _setDNF(TimerDNFEvent event, Emitter<TimerState> emit) async {
-    if (event.index == null) {
-      // update last/current result
+    if (event.resultEntity == null) {
+      //updating last/current result
       if (state.currentResult == null) return;
       final penalty = !state.currentResult!.isDNF;
       final updatedResult = state.currentResult!.copyWith(isDNF: penalty);
-      await _updateResultUseCase(
-          ParamsIndexedResult(updatedResult, state.results.length - 1));
       state.results.last = updatedResult;
       emit(state.copyWith(currentResult: updatedResult));
-    } else {
-      // in bottom sheet
-      final penalty = !state.resultInBottomSheet!.isDNF;
-      final updatedResult = state.resultInBottomSheet!.copyWith(isDNF: penalty);
-      final results = state.results..[event.index!] = updatedResult;
-      await _updateResultUseCase(
-          ParamsIndexedResult(updatedResult, event.index!));
 
-      // if updated last solve (currentResult)
-      if (state.results.length - 1 == event.index &&
-          state.currentResult != null) {
+      await _updateResultUseCase(
+          ParamsIndexedResult(updatedResult, state.results.length - 1));
+    } else {
+      final penalty = !event.resultEntity!.isDNF;
+      final updatedResult = event.resultEntity!.copyWith(isDNF: penalty);
+      final index = state.results.toList().indexOf(event.resultEntity!);
+      final updatedResultsList = state.results.toList()
+        ..[index] = updatedResult;
+      if (state.results.length - 1 == index) {
+        //updated last result
         emit(state.copyWith(currentResult: updatedResult));
       }
+      emit(state.copyWith(
+        results: updatedResultsList,
+        resultInBottomSheet: updatedResult,
+      ));
 
-      emit(
-          state.copyWith(resultInBottomSheet: updatedResult, results: results));
+      await _updateResultUseCase(ParamsIndexedResult(updatedResult));
     }
 
     add(TimerRecountAvgEvent());
     add(const TimerGetBestAvgEvent(true));
   }
 
-  ///in this method if index is null or index equals the last result index.
+  ///in this method if resultEntity is null
   ///then the last result is deleted, if not,
-  ///then the result is deleted by index
+  ///then the resultEntity is deleted
+  //////After the operation, [TimerRecountAvgEvent] and [TimerGetBestAvgEvent] are called
   Future<void> _deleteResult(
       TimerDeleteResultEvent event, Emitter<TimerState> emit) async {
-    //if index == null or chosen result == currentResult
-    if (event.index == null) {
+    //if delete current solve
+    if (event.resultEntity == null) {
       if (state.currentResult == null) return;
-      // deleting current result
-      final length = state.results.length;
-      await _deleteResultUseCase(ParamsIndexedEvent(state.event, length - 1));
-      final results = state.results..removeAt(length - 1);
+      final resultToDelete = state.currentResult!;
+      final results = state.results.toList()..removeAt(state.results.length - 1);
+
+      await _deleteResultUseCase(
+          ParamsIndexedResult(resultToDelete, state.results.length - 1));
+
       emit(state
           .copyWith(results: results, timeInMillis: 0)
           .nullCurrentResult());
     } else {
-      //deleting result from bottomSheet
-      await _deleteResultUseCase(ParamsIndexedEvent(state.event, event.index!));
-
-      if (state.results.length - 1 == event.index) {
+      final index = state.results.toList().indexOf(event.resultEntity!);
+      if (state.results.length - 1 == index) {
         // if deleted last solve (currentResult)
         emit(state.copyWith(timeInMillis: 0).nullCurrentResult());
       }
-
       final results = state.results.toList()
-        ..removeAt(event.index!); // copy and remove
+        ..removeAt(index); // copy and remove
 
       emit(state.copyWith(results: results));
+      await _deleteResultUseCase(ParamsIndexedResult(event.resultEntity!));
     }
 
     add(TimerRecountAvgEvent());
@@ -378,12 +381,11 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
 
   ///This method is called when the user changes the description in the BottomSheet
   void _updateDescriptionEvent(
-      TimerUpdateDescriptionEvent event, Emitter<TimerState> emit) {
+      TimerUpdateDescriptionEvent event, Emitter<TimerState> emit) async {
     final updatedResult =
         state.resultInBottomSheet!.copyWith(description: event.text);
     final results = state.results..[event.index] = updatedResult;
-    //without await
-    _updateResultUseCase(ParamsIndexedResult(updatedResult, event.index));
+    await _updateResultUseCase(ParamsIndexedResult(updatedResult, event.index));
 
     emit(state.copyWith(resultInBottomSheet: updatedResult, results: results));
   }

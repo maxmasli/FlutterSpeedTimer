@@ -5,14 +5,14 @@ import 'package:speedtimer_flutter/features/speedtimer/domain/entities/result_en
 import 'package:speedtimer_flutter/features/speedtimer/domain/repositories/result_repository.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/params.dart';
 
-class DeleteResultUseCase extends UseCase<ResultEntity, ParamsIndexedEvent> {
+class DeleteResultUseCase extends UseCase<ResultEntity, ParamsIndexedResult> {
 
   final ResultRepository resultRepository;
 
   DeleteResultUseCase({required this.resultRepository});
 
   @override
-  Future<Either<Failure, ResultEntity>> call(ParamsIndexedEvent params) async {
-    return await resultRepository.deleteResult(params.event, params.index);
+  Future<Either<Failure, ResultEntity>> call(ParamsIndexedResult params) async {
+    return await resultRepository.deleteResult(params.resultEntity, params.index);
   }
 }

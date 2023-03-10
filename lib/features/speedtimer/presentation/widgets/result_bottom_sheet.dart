@@ -49,14 +49,12 @@ class _ResultBottomSheetState extends State<ResultBottomSheet> {
                 children: [
                   ResultBottomSheetPlus2ButtonWidget(
                     resultEntity: state.resultInBottomSheet!,
-                    index: widget.index,
                   ),
                   ResultBottomSheetDNFButtonWidget(
                     resultEntity: state.resultInBottomSheet!,
-                    index: widget.index,
                   ),
                   ResultBottomSheetDeleteButtonWidget(
-                    index: widget.index,
+                    resultEntity: state.resultInBottomSheet!,
                   ),
                 ],
               ),
@@ -79,10 +77,9 @@ class _ResultBottomSheetState extends State<ResultBottomSheet> {
 
 class ResultBottomSheetPlus2ButtonWidget extends StatelessWidget {
   final ResultEntity resultEntity;
-  final int index;
 
   const ResultBottomSheetPlus2ButtonWidget(
-      {Key? key, required this.resultEntity, required this.index})
+      {Key? key, required this.resultEntity})
       : super(key: key);
 
   @override
@@ -94,7 +91,7 @@ class ResultBottomSheetPlus2ButtonWidget extends StatelessWidget {
     }
     return ElevatedButton(
       onPressed: () {
-        bloc.add(TimerPlus2Event(index));
+        bloc.add(TimerPlus2Event(resultEntity));
       },
       style: ButtonStyle(
         backgroundColor: MaterialStateProperty.all(backgroundColor),
@@ -110,10 +107,9 @@ class ResultBottomSheetPlus2ButtonWidget extends StatelessWidget {
 
 class ResultBottomSheetDNFButtonWidget extends StatelessWidget {
   final ResultEntity resultEntity;
-  final int index;
 
   const ResultBottomSheetDNFButtonWidget(
-      {Key? key, required this.resultEntity, required this.index})
+      {Key? key, required this.resultEntity})
       : super(key: key);
 
   @override
@@ -125,7 +121,7 @@ class ResultBottomSheetDNFButtonWidget extends StatelessWidget {
     }
     return ElevatedButton(
       onPressed: () {
-        bloc.add(TimerDNFEvent(index));
+        bloc.add(TimerDNFEvent(resultEntity));
       },
       style: ButtonStyle(
         backgroundColor: MaterialStateProperty.all(backgroundColor),
@@ -140,17 +136,17 @@ class ResultBottomSheetDNFButtonWidget extends StatelessWidget {
 }
 
 class ResultBottomSheetDeleteButtonWidget extends StatelessWidget {
-  const ResultBottomSheetDeleteButtonWidget({Key? key, required this.index})
-      : super(key: key);
+  final ResultEntity resultEntity;
 
-  final int index;
+  const ResultBottomSheetDeleteButtonWidget({Key? key, required this.resultEntity})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final bloc = context.read<TimerBloc>();
     return IconButton(
         onPressed: () {
-          bloc.add(TimerDeleteResultEvent(index));
+          bloc.add(TimerDeleteResultEvent(resultEntity));
           Navigator.of(context).pop();
         },
         icon: Icon(

@@ -10,7 +10,11 @@ abstract class ResultLocalDataSource {
 
   Future<ResultModel> updateResult(ResultModel resultModel, int index);
 
-  Future<ResultModel> deleteResult(Event event, int index);
+  Future<ResultModel> updateResultById(ResultModel resultModel);
+
+  Future<ResultModel> deleteResult(ResultModel resultModel, int index);
+
+  Future<ResultModel> deleteResultById(ResultModel resultModel);
 
   Future<void> deleteAllResults(Event event);
 }
@@ -27,7 +31,8 @@ class ResultLocalDataSourceImpl implements ResultLocalDataSource {
       ResultModel? result = box.getAt(i);
       if (result == null) {
         throw HiveException("Result from ${event.toString()} is null");
-      }results.add(result);
+      }
+      results.add(result);
     }
 
     await box.close();
@@ -51,15 +56,36 @@ class ResultLocalDataSourceImpl implements ResultLocalDataSource {
   }
 
   @override
-  Future<ResultModel> deleteResult(Event event, int index) async {
-    final box = await Hive.openBox<ResultModel>(event.toString());
-    final deletedResult = box.getAt(index);
+  Future<ResultModel> updateResultById(ResultModel resultModel) async {
+    final box = await Hive.openBox<ResultModel>(resultModel.event.toString());
+    final resultToUpdate = box.values.firstWhere((result) =>
+    result.uuid == resultModel.uuid);
+    final index = box.values.toList().indexOf(resultToUpdate);
+
+    await box.putAt(index, resultModel);
+    await box.close();
+    return resultModel;
+  }
+
+  @override
+  Future<ResultModel> deleteResult(ResultModel resultModel, int index) async {
+    final box = await Hive.openBox<ResultModel>(resultModel.event.toString());
     await box.deleteAt(index);
     await box.close();
-    if (deletedResult == null) {
-      throw HiveException("deleteResult, deletedResult == null");
-    }
-    return deletedResult;
+    return resultModel;
+  }
+
+  @override
+  Future<ResultModel> deleteResultById(ResultModel resultModel) async {
+    final box = await Hive.openBox<ResultModel>(resultModel.event.toString());
+
+    final resultToDelete = box.values.firstWhere((result) =>
+    result.uuid == resultModel.uuid);
+    final index = box.values.toList().indexOf(resultToDelete);
+    await box.deleteAt(index);
+    await box.close();
+
+    return resultModel;
   }
 
   @override
