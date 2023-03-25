@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:speedtimer_flutter/core/use_case/use_case.dart';
 import 'package:speedtimer_flutter/core/utils/consts.dart';
 import 'package:speedtimer_flutter/core/utils/speedcubing_timer.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/entities/avg_entity.dart';
@@ -15,8 +16,10 @@ import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/get_all_
 import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/get_avg_use_case.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/get_best_avg_use_case.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/get_best_sovle_use_case.dart';
+import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/get_delay_use_case.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/get_scramble_use_case.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/params.dart';
+import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/save_delay_use_case.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/save_result_use_case.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/use_cases/update_result_use_case.dart';
 import 'package:uuid/uuid.dart';
@@ -37,6 +40,8 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
   final CompareBestAvgUseCase _compareBestAvgUseCase;
   final DeleteAllResultsUseCase _deleteAllResultsUseCase;
   final GetBestSolveUseCase _getBestSolveUseCase;
+  final SaveDelayUseCase _saveDelayUseCase;
+  final GetDelayUseCase _getDelayUseCase;
 
   Timer? _timer;
   final _speedcubingTimer = SpeedcubingTimer();
@@ -53,6 +58,8 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     required CompareBestAvgUseCase compareBestAvgUseCase,
     required DeleteAllResultsUseCase deleteAllResultsUseCase,
     required GetBestSolveUseCase getBestSolveUseCase,
+    required SaveDelayUseCase saveDelayUseCase,
+    required GetDelayUseCase getDelayUseCase,
   })  : _saveResultUseCase = saveResultUseCase,
         _getAllResultsUseCase = getAllResultsUseCase,
         _getScrambleUseCase = getScrambleUseCase,
@@ -63,6 +70,8 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
         _compareBestAvgUseCase = compareBestAvgUseCase,
         _deleteAllResultsUseCase = deleteAllResultsUseCase,
         _getBestSolveUseCase = getBestSolveUseCase,
+        _saveDelayUseCase = saveDelayUseCase,
+        _getDelayUseCase = getDelayUseCase,
         super(const TimerState(
           event: Event.cube333,
           scramble: "",
@@ -96,6 +105,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     on<TimerDeleteAllResultsEvent>(_deleteAllResults);
     on<TimerChangeEvent>(_changeEvent);
     on<TimerSetDelayEvent>(_setDelay);
+    on<TimerGetDelayEvent>(_getDelay);
     on<TimerGetBestSolveEvent>(_getBestSolve);
   }
 
@@ -103,6 +113,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
   void _appStarted(TimerAppStartedEvent event, Emitter<TimerState> emit) {
     add(TimerGetScrambleEvent());
     add(TimerGetAllResultsAndRecalculateEvent());
+    add(TimerGetDelayEvent());
   }
 
   ///calls when finger tap down
@@ -458,10 +469,26 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
   ///this method set delay
   Future<void> _setDelay(
       TimerSetDelayEvent event, Emitter<TimerState> emit) async {
+    print("set delay ${event.delay}");
     emit(
       state.copyWith(
         settingsEntity: state.settingsEntity.copyWith(delay: event.delay),
       ),
+    );
+
+    await _saveDelayUseCase(ParamsDelay(event.delay));
+  }
+
+  ///this method calls every time when app started
+  Future<void> _getDelay(
+      TimerGetDelayEvent event, Emitter<TimerState> emit) async {
+    final delay = await _getDelayUseCase(NoParams());
+
+    delay.fold(
+      (l) => emit(state.copyWith(
+          settingsEntity: state.settingsEntity.copyWith(delay: 0))),
+      (delay) => emit(state.copyWith(
+          settingsEntity: state.settingsEntity.copyWith(delay: delay))),
     );
   }
 

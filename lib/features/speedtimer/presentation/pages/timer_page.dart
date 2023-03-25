@@ -1,7 +1,3 @@
-import 'dart:async';
-import 'dart:async';
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:speedtimer_flutter/core/utils/utils.dart';
@@ -9,7 +5,6 @@ import 'package:speedtimer_flutter/di.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/entities/events.dart';
 import 'package:speedtimer_flutter/features/speedtimer/presentation/bloc/timer_bloc.dart';
 import 'package:speedtimer_flutter/features/speedtimer/presentation/widgets/change_event_dialog.dart';
-import 'package:speedtimer_flutter/theme.dart';
 
 class TimerPage extends StatelessWidget {
   const TimerPage({Key? key}) : super(key: key);
@@ -17,7 +12,7 @@ class TimerPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: mainColor,
+      backgroundColor: Theme.of(context).colorScheme.primary,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: const [
@@ -66,7 +61,6 @@ class TimerPenaltyWidget extends StatelessWidget {
   }
 }
 
-
 class TimerMainWidget extends StatelessWidget {
   const TimerMainWidget({Key? key}) : super(key: key);
 
@@ -108,11 +102,11 @@ class TimerWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<TimerBloc, TimerState>(
       buildWhen: (prev, state) =>
-      prev.timeInMillis != state.timeInMillis ||
+          prev.timeInMillis != state.timeInMillis ||
           prev.timerStateEnum != state.timerStateEnum ||
           prev.currentResult != state.currentResult,
       builder: (context, state) {
-        var textColor = Colors.black;
+        var textColor = Theme.of(context).textTheme.bodyMedium!.color;
         if (state.timerStateEnum == TimerStateEnum.readyToStart) {
           textColor = Colors.green;
         }
@@ -193,7 +187,9 @@ class TimerScrambleWidget extends StatelessWidget {
       builder: (context, state) {
         return Text(
           state.scramble,
-          style: const TextStyle(fontSize: 24),
+          style: TextStyle(
+              fontSize: 24,
+              color: Theme.of(context).textTheme.bodyMedium!.color),
           textAlign: TextAlign.center,
         );
       },
@@ -210,7 +206,7 @@ class TimerPlus2ButtonWidget extends StatelessWidget {
     return BlocBuilder<TimerBloc, TimerState>(
       buildWhen: (prev, state) => prev.currentResult != state.currentResult,
       builder: (context, state) {
-        var backgroundColor = secondaryColor;
+        var backgroundColor = Theme.of(context).colorScheme.secondary;
         if (state.currentResult != null && state.currentResult!.isPlus2) {
           backgroundColor = Colors.red;
         }
@@ -226,7 +222,12 @@ class TimerPlus2ButtonWidget extends StatelessWidget {
               borderRadius: const BorderRadius.all(Radius.circular(100)),
               color: backgroundColor,
             ),
-            child: const Text("+2", style: TextStyle(fontSize: 25),),
+            child: Text(
+              "+2",
+              style: TextStyle(
+                  fontSize: 25,
+                  color: Theme.of(context).textTheme.bodyMedium!.color),
+            ),
           ),
         );
       },
@@ -243,7 +244,7 @@ class TimerDNFButtonWidget extends StatelessWidget {
     return BlocBuilder<TimerBloc, TimerState>(
       buildWhen: (prev, state) => prev.currentResult != state.currentResult,
       builder: (context, state) {
-        var backgroundColor = secondaryColor;
+        var backgroundColor = Theme.of(context).colorScheme.secondary;
         if (state.currentResult != null && state.currentResult!.isDNF) {
           backgroundColor = Colors.red;
         }
@@ -259,7 +260,12 @@ class TimerDNFButtonWidget extends StatelessWidget {
               borderRadius: const BorderRadius.all(Radius.circular(100)),
               color: backgroundColor,
             ),
-            child: const Text("DNF", style: TextStyle(fontSize: 25),),
+            child: Text(
+              "DNF",
+              style: TextStyle(
+                  fontSize: 25,
+                  color: Theme.of(context).textTheme.bodyMedium!.color),
+            ),
           ),
         );
       },
@@ -281,11 +287,15 @@ class TimerDeleteResultWidget extends StatelessWidget {
         width: 70,
         height: 70,
         alignment: Alignment.center,
-        decoration: const BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(100)),
-          color: secondaryColor,
+        decoration: BoxDecoration(
+          borderRadius: const BorderRadius.all(Radius.circular(100)),
+          color: Theme.of(context).colorScheme.secondary,
         ),
-        child: const Icon(Icons.delete, size: 30),
+        child: Icon(
+          Icons.delete,
+          size: 30,
+          color: Theme.of(context).textTheme.bodyMedium!.color,
+        ),
       ),
     );
   }
@@ -310,14 +320,17 @@ class TimerChangeEventButtonWidget extends StatelessWidget {
         width: double.infinity,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: secondaryColor,
+          color: Theme.of(context).colorScheme.secondary,
           border: Border.all(width: 2),
           borderRadius: const BorderRadius.all(Radius.circular(10)),
         ),
         child: BlocBuilder<TimerBloc, TimerState>(
           buildWhen: (prev, state) => prev.event != state.event,
           builder: (context, state) {
-            return Text(state.event.toEventString(), style: TextStyle(fontSize: 30));
+            return Text(state.event.toEventString(),
+                style: TextStyle(
+                    fontSize: 30,
+                    color: Theme.of(context).textTheme.bodyMedium!.color));
           },
         ),
       ),
@@ -340,9 +353,12 @@ class TimerResultsButtonWidget extends StatelessWidget {
         decoration: BoxDecoration(
             color: const Color(0xFFFFFFFF).withOpacity(0.5),
             borderRadius: const BorderRadius.all(Radius.circular(100))),
-        child: const Padding(
-          padding: EdgeInsets.symmetric(vertical: 60, horizontal: 3),
-          child: Icon(Icons.arrow_forward_ios),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 3),
+          child: Icon(
+            Icons.arrow_forward_ios,
+            color: Theme.of(context).textTheme.bodyMedium!.color,
+          ),
         ),
       ),
     );
@@ -364,9 +380,12 @@ class TimerSettingsButtonWidget extends StatelessWidget {
         decoration: BoxDecoration(
             color: const Color(0xFFFFFFFF).withOpacity(0.5),
             borderRadius: const BorderRadius.all(Radius.circular(100))),
-        child: const Padding(
-          padding: EdgeInsets.symmetric(vertical: 60, horizontal: 3),
-          child: Icon(Icons.arrow_back_ios_new),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 3),
+          child: Icon(
+            Icons.arrow_back_ios_new,
+            color: Theme.of(context).textTheme.bodyMedium!.color,
+          ),
         ),
       ),
     );

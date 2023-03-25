@@ -5,7 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speedtimer_flutter/features/speedtimer/data/models/avg_model.dart';
 import 'package:speedtimer_flutter/features/speedtimer/data/models/result_model.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/entities/events.dart';
-import 'package:speedtimer_flutter/features/speedtimer/domain/entities/result_entity.dart';
 
 abstract class AvgLocalSource {
   Future<AvgModel> getAvg(List<ResultModel> results);

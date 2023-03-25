@@ -85,4 +85,6 @@ class TimerSetDelayEvent extends TimerEvent {
   const TimerSetDelayEvent(this.delay);
 }
 
+class TimerGetDelayEvent extends TimerEvent {}
+
 class TimerGetBestSolveEvent extends TimerEvent {}
