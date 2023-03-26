@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
-class ColorPickerDialog extends StatelessWidget {
-  ColorPickerDialog({Key? key, required this.initColor})
-      : currentColor = initColor,
-        super(key: key);
+class ColorPickerDialog extends StatefulWidget {
+  const ColorPickerDialog({Key? key, required this.initColor}) : super(key: key);
 
   final Color initColor;
-  Color currentColor;
+
+  @override
+  State<ColorPickerDialog> createState() => _ColorPickerDialogState();
+}
+
+class _ColorPickerDialogState extends State<ColorPickerDialog> {
+  Color? currentColor;
 
   void onColorChanged(Color newColor) {
     currentColor = newColor;
@@ -22,12 +26,13 @@ class ColorPickerDialog extends StatelessWidget {
       elevation: 20,
       content: SingleChildScrollView(
         child: ColorPicker(
-          pickerColor: initColor,
+          pickerColor: widget.initColor,
           onColorChanged: onColorChanged,
         ),
       ),
       actions: [
-        OkButtonWidget(onTap: () => Navigator.of(context).pop(currentColor))
+        OkButtonWidget(
+            onTap: () => Navigator.of(context).pop(currentColor))
       ],
     );
   }
