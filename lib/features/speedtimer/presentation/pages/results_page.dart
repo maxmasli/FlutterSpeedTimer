@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:speedtimer_flutter/core/utils/utils.dart';
 import 'package:speedtimer_flutter/di.dart';
+import 'package:speedtimer_flutter/features/speedtimer/domain/entities/events.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/entities/result_entity.dart';
 import 'package:speedtimer_flutter/features/speedtimer/presentation/bloc/timer_bloc.dart';
 import 'package:speedtimer_flutter/features/speedtimer/presentation/widgets/result_bottom_sheet.dart';
@@ -15,16 +16,17 @@ class ResultsPage extends StatelessWidget {
     return WillPopScope(
       onWillPop: () async {
         sl<PageController>().animateToPage(1,
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.ease);
+            duration: const Duration(milliseconds: 200), curve: Curves.ease);
         return false;
       },
       child: Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.primary,
         resizeToAvoidBottomInset: true,
         body: Column(
           children: const [
             ResultsAppBarWidget(),
             ResultsWidget(),
+            BottomBarWidget(),
           ],
         ),
       ),
@@ -41,20 +43,79 @@ class ResultsAppBarWidget extends StatelessWidget {
       color: Colors.black,
       elevation: 10,
       child: SizedBox(
-        height: 130,
+        height: 60,
         width: double.infinity,
         child: ColoredBox(
-          color: Theme.of(context).primaryColor,
-          child: Row(
-            children: const [
-              ResultsAvgWidget(),
-              ResultsBestAvgWidget(),
-              ResultsDeleteAllButtonWidget(),
-              ResultEventImageWidget(),
-            ],
+          color: Theme.of(context).colorScheme.secondary,
+          child: Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: Row(
+              children: const [
+                NavigationBackButtonWidget(),
+                EventNameWidget(),
+                Expanded(child: SizedBox()),
+                // to make space between event and button
+                ResultsDeleteAllButtonWidget(),
+              ],
+            ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class BottomBarWidget extends StatelessWidget {
+  const BottomBarWidget({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return PhysicalModel(
+      color: Colors.black,
+      elevation: 10,
+      child: Container(
+        color: Theme.of(context).colorScheme.secondary,
+        child: Row(
+          children: const [
+            ResultsAvgWidget(),
+            ResultsBestAvgWidget(),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class EventNameWidget extends StatelessWidget {
+  const EventNameWidget({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<TimerBloc, TimerState>(
+      builder: (context, state) {
+        return Text(
+          state.event.toEventString(),
+          style: TextStyle(
+            color: Theme.of(context).textTheme.bodyMedium!.color,
+            fontSize: 26,
+          ),
+        );
+      },
+    );
+  }
+}
+
+class NavigationBackButtonWidget extends StatelessWidget {
+  const NavigationBackButtonWidget({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: () {
+        sl<PageController>().animateToPage(1,
+            duration: const Duration(milliseconds: 200), curve: Curves.ease);
+      },
+      icon: const Icon(Icons.arrow_back_ios_new),
     );
   }
 }
@@ -64,17 +125,25 @@ class ResultsAvgWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final style = TextStyle(
+        fontSize: 20, color: Theme.of(context).textTheme.bodyMedium!.color);
     return BlocBuilder<TimerBloc, TimerState>(
       buildWhen: (prev, state) => prev.avgEntity != state.avgEntity,
       builder: (context, state) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("Ao5: ${state.avgEntity.stringAvg5}"),
-            Text("Ao12: ${state.avgEntity.stringAvg12}"),
-            Text("Ao50: ${state.avgEntity.stringAvg50}"),
-            Text("Ao100: ${state.avgEntity.stringAvg100}"),
-          ],
+        return Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Ao5: ${state.avgEntity.stringAvg5}", style: style),
+                Text("Ao12: ${state.avgEntity.stringAvg12}", style: style),
+                Text("Ao50: ${state.avgEntity.stringAvg50}", style: style),
+                Text("Ao100: ${state.avgEntity.stringAvg100}", style: style),
+                Text("Total: ${state.results.length}", style: style),
+              ],
+            ),
+          ),
         );
       },
     );
@@ -86,34 +155,59 @@ class ResultsBestAvgWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final style = TextStyle(
+        fontSize: 20, color: Theme.of(context).textTheme.bodyMedium!.color);
     return BlocBuilder<TimerBloc, TimerState>(
       buildWhen: (prev, state) => prev.bestAvgEntity != state.bestAvgEntity,
       builder: (context, state) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("Best Ao5: ${state.bestAvgEntity.stringAvg5}"),
-            Text("Best Ao12: ${state.bestAvgEntity.stringAvg12}"),
-            Text("Best Ao50: ${state.bestAvgEntity.stringAvg50}"),
-            Text("Best Ao100: ${state.bestAvgEntity.stringAvg100}"),
-          ],
+        return Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Best Ao5: ${state.bestAvgEntity.stringAvg5}",
+                    style: style),
+                Text("Best Ao12: ${state.bestAvgEntity.stringAvg12}",
+                    style: style),
+                Text("Best Ao50: ${state.bestAvgEntity.stringAvg50}",
+                    style: style),
+                Text("Best Ao100: ${state.bestAvgEntity.stringAvg100}",
+                    style: style),
+                Text("Best solve: ${state.bestSolve?.stringTime ?? "DNF"}",
+                    style: style)
+              ],
+            ),
+          ),
         );
       },
     );
-    ;
+
   }
 }
 
 class ResultsDeleteAllButtonWidget extends StatelessWidget {
   const ResultsDeleteAllButtonWidget({Key? key}) : super(key: key);
 
+//
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () {
+    return GestureDetector(
+      onTap: () {
         context.read<TimerBloc>().add(TimerDeleteAllResultsEvent());
       },
-      child: const Text("delete"),
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          borderRadius: const BorderRadius.all(Radius.circular(100)),
+          color: Theme.of(context).colorScheme.primary,
+        ),
+        child: Text(
+          "Delete",
+          style: TextStyle(
+              fontSize: 20, color: Theme.of(context).textTheme.bodyMedium!.color),
+        ),
+      ),
     );
   }
 }
@@ -141,15 +235,14 @@ class ResultsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<TimerBloc, TimerState>(
-      listener: (context, state) => print("listen"),
+    return BlocBuilder<TimerBloc, TimerState>(
       buildWhen: (prev, state) =>
           prev.results.length != state.results.length ||
           prev.resultInBottomSheet != state.resultInBottomSheet ||
           prev.isLoading != state.isLoading,
       builder: (context, state) {
         if (state.isLoading) {
-          return const CircularProgressIndicator();
+          return const Expanded(child: CircularProgressIndicator());
         } else {
           return Expanded(
             child: GridView.builder(
@@ -205,8 +298,9 @@ class ResultsItemWidget extends StatelessWidget {
         );
       },
       child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.black, width: 3),
+          color: Theme.of(context).colorScheme.secondary,
           borderRadius: const BorderRadius.all(
             Radius.circular(15),
           ),
@@ -217,7 +311,9 @@ class ResultsItemWidget extends StatelessWidget {
             Center(
               child: Text(
                 resultEntity.stringTime,
-                style: const TextStyle(fontSize: 18),
+                style: TextStyle(
+                    fontSize: 22,
+                    color: Theme.of(context).textTheme.bodyMedium!.color!),
               ),
             ),
             if (resultEntity.isPlus2)
