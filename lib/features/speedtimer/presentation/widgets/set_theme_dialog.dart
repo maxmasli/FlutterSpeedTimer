@@ -92,13 +92,9 @@ class ThemeTileWidget extends StatelessWidget {
           children: [
             Text(
               text,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 20,
-                color: Theme
-                    .of(context)
-                    .textTheme
-                    .bodyMedium!
-                    .color,
+                color: Colors.black,
               ),
             ),
             ColoredCircleWidget(
@@ -124,7 +120,7 @@ class ColoredCircleWidget extends StatelessWidget {
       decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(100)),
           color: color,
-          border: Border.all(color: Colors.black, width: 2)),
+          border: Border.all(color: Colors.black, width: 1)),
     );
   }
 }

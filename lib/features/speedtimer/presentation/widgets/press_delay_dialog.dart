@@ -17,16 +17,26 @@ class PressDelayDialog extends StatelessWidget {
       child: BlocBuilder<TimerBloc, TimerState>(
         buildWhen: (prev, state) => prev.settingsEntity != state.settingsEntity,
         builder: (context, state) {
-          return Slider(
-            value: state.settingsEntity.delay,
-            onChanged: (newDelay) {
-              delay = newDelay;
-              bloc.add(TimerSetDelayEvent(newDelay));
-            },
-            min: 0,
-            max: 1,
-            divisions: 10,
-            label: "$delay",
+          return SliderTheme(
+            data: SliderTheme.of(context).copyWith(
+              valueIndicatorTextStyle: const TextStyle(
+                color: Colors.black,
+              ),
+              valueIndicatorColor: Colors.black12
+            ),
+            child: Slider(
+              activeColor: Colors.black,
+              inactiveColor: Colors.black26,
+              value: state.settingsEntity.delay,
+              onChanged: (newDelay) {
+                delay = newDelay;
+                bloc.add(TimerSetDelayEvent(newDelay));
+              },
+              min: 0,
+              max: 1,
+              divisions: 10,
+              label: "$delay",
+            ),
           );
         },
       ),

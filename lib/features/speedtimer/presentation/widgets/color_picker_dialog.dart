@@ -27,13 +27,32 @@ class ColorPickerDialog extends StatelessWidget {
         ),
       ),
       actions: [
-        ElevatedButton(
-          onPressed: () {
-            Navigator.of(context).pop(currentColor);
-          },
-          child: const Text("OK"),
-        )
+        OkButtonWidget(onTap: () => Navigator.of(context).pop(currentColor))
       ],
+    );
+  }
+}
+
+class OkButtonWidget extends StatelessWidget {
+  const OkButtonWidget({Key? key, required this.onTap}) : super(key: key);
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+        decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.primary,
+            borderRadius: const BorderRadius.all(Radius.circular(100))),
+        child: Text(
+          "OK",
+          style:
+              TextStyle(color: Theme.of(context).textTheme.bodyMedium!.color),
+        ),
+      ),
     );
   }
 }

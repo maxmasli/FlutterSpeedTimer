@@ -4,7 +4,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:speedtimer_flutter/core/utils/utils.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/entities/events.dart';
 import 'package:speedtimer_flutter/features/speedtimer/presentation/bloc/timer_bloc.dart';
-import 'package:speedtimer_flutter/resources/resources.dart';
 
 class ChangeEventDialog extends StatelessWidget {
   const ChangeEventDialog({Key? key}) : super(key: key);
@@ -17,7 +16,7 @@ class ChangeEventDialog extends StatelessWidget {
       ),
       elevation: 20,
       child: Container(
-        child: EventsWidget(),
+        child: const EventsWidget(),
       ),
     );
   }
