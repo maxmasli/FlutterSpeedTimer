@@ -115,7 +115,10 @@ class NavigationBackButtonWidget extends StatelessWidget {
         sl<PageController>().animateToPage(1,
             duration: const Duration(milliseconds: 200), curve: Curves.ease);
       },
-      icon: const Icon(Icons.arrow_back_ios_new),
+      icon: Icon(
+        Icons.arrow_back_ios_new,
+        color: Theme.of(context).textTheme.bodyMedium!.color,
+      ),
     );
   }
 }
@@ -182,7 +185,6 @@ class ResultsBestAvgWidget extends StatelessWidget {
         );
       },
     );
-
   }
 }
 
@@ -205,7 +207,8 @@ class ResultsDeleteAllButtonWidget extends StatelessWidget {
         child: Text(
           "Delete",
           style: TextStyle(
-              fontSize: 20, color: Theme.of(context).textTheme.bodyMedium!.color),
+              fontSize: 20,
+              color: Theme.of(context).textTheme.bodyMedium!.color),
         ),
       ),
     );
