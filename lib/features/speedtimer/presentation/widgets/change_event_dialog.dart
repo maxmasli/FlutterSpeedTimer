@@ -15,9 +15,7 @@ class ChangeEventDialog extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
       ),
       elevation: 20,
-      child: Container(
-        child: const EventsWidget(),
-      ),
+      child: const EventsWidget(),
     );
   }
 }
@@ -27,21 +25,21 @@ class EventsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final eventList = <Event>[...Event.values]
-        .map((event) => EventWidget(
+    final eventListWidgets = <Event>[...Event.values]
+        .map((event) => EventTile(
               event: event,
             ))
         .toList();
 
     return Wrap(
       alignment: WrapAlignment.center,
-      children: eventList,
+      children: eventListWidgets,
     );
   }
 }
 
-class EventWidget extends StatelessWidget {
-  const EventWidget({Key? key, required this.event}) : super(key: key);
+class EventTile extends StatelessWidget {
+  const EventTile({Key? key, required this.event}) : super(key: key);
 
   final Event event;
 
@@ -52,8 +50,25 @@ class EventWidget extends StatelessWidget {
         context.read<TimerBloc>().add(TimerChangeEvent(event));
         Navigator.of(context).pop();
       },
-      child:
-          SvgPicture.asset(getSvgAssetByEvent(event), width: 100, height: 100),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SvgPicture.asset(getSvgAssetByEvent(event), width: 60, height: 60),
+            Text(
+              event.toEventString(),
+              style: const TextStyle(
+                color: Colors.black,
+                fontSize: 16
+              ),
+            )
+          ],
+        ),
+      ),
     );
   }
 }
+
+//context.read<TimerBloc>().add(TimerChangeEvent(event));
+//SvgPicture.asset(getSvgAssetByEvent(event), width: 100, height: 100),
