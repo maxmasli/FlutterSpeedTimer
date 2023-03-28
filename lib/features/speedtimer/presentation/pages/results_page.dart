@@ -129,7 +129,7 @@ class ResultsAvgWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final style = TextStyle(
-        fontSize: 20, color: Theme.of(context).textTheme.bodyMedium!.color);
+        fontSize: 16, color: Theme.of(context).textTheme.bodyMedium!.color);
     return BlocBuilder<TimerBloc, TimerState>(
       buildWhen: (prev, state) => prev.avgEntity != state.avgEntity,
       builder: (context, state) {
@@ -159,7 +159,7 @@ class ResultsBestAvgWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final style = TextStyle(
-        fontSize: 20, color: Theme.of(context).textTheme.bodyMedium!.color);
+        fontSize: 16, color: Theme.of(context).textTheme.bodyMedium!.color);
     return BlocBuilder<TimerBloc, TimerState>(
       buildWhen: (prev, state) => prev.bestAvgEntity != state.bestAvgEntity,
       builder: (context, state) {

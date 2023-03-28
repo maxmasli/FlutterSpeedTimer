@@ -69,6 +69,3 @@ class EventTile extends StatelessWidget {
     );
   }
 }
-
-//context.read<TimerBloc>().add(TimerChangeEvent(event));
-//SvgPicture.asset(getSvgAssetByEvent(event), width: 100, height: 100),
