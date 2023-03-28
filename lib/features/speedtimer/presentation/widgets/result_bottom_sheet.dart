@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:speedtimer_flutter/core/utils/consts.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/entities/result_entity.dart';
 import 'package:speedtimer_flutter/features/speedtimer/presentation/bloc/timer_bloc.dart';
 
-class ResultBottomSheet extends StatefulWidget {
+class ResultBottomSheet extends StatelessWidget {
   final ResultEntity resultEntity;
   final int index;
 
@@ -12,10 +13,98 @@ class ResultBottomSheet extends StatefulWidget {
       : super(key: key);
 
   @override
-  State<ResultBottomSheet> createState() => _ResultBottomSheetState();
+  Widget build(BuildContext context) {
+    return BlocBuilder<TimerBloc, TimerState>(
+      buildWhen: (prev, state) =>
+          prev.resultInBottomSheet != state.resultInBottomSheet,
+      builder: (context, state) {
+        return Padding(
+          padding:
+              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          child: Row(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ResultBodyWidget(
+                    resultEntity: resultEntity,
+                    index: index,
+                  ),
+                ),
+              ),
+              ResultPenaltyButtons(resultEntity: state.resultInBottomSheet!),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
 
-class _ResultBottomSheetState extends State<ResultBottomSheet> {
+class ResultPenaltyButtons extends StatelessWidget {
+  const ResultPenaltyButtons({Key? key, required this.resultEntity})
+      : super(key: key);
+
+  final ResultEntity resultEntity;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ResultBottomSheetPlus2ButtonWidget(resultEntity: resultEntity),
+        ResultBottomSheetDNFButtonWidget(resultEntity: resultEntity),
+        ResultBottomSheetDeleteButtonWidget(resultEntity: resultEntity),
+      ],
+    );
+  }
+}
+
+class ResultBodyWidget extends StatelessWidget {
+  const ResultBodyWidget(
+      {Key? key, required this.resultEntity, required this.index})
+      : super(key: key);
+
+  final ResultEntity resultEntity;
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.read<TimerBloc>().state;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SolveTimeWidget(
+          time: state.resultInBottomSheet!.stringTime,
+          isPlus: state.resultInBottomSheet!.isPlus2,
+          isDNF: state.resultInBottomSheet!.isDNF,
+        ),
+        ScrambleWidget(
+          scramble: state.resultInBottomSheet!.scramble,
+        ),
+        DescriptionWidget(
+          resultEntity: resultEntity,
+          index: index,
+        ),
+      ],
+    );
+  }
+}
+
+class DescriptionWidget extends StatefulWidget {
+  const DescriptionWidget(
+      {Key? key, required this.resultEntity, required this.index})
+      : super(key: key);
+
+  final ResultEntity resultEntity;
+  final int index;
+
+  @override
+  State<DescriptionWidget> createState() => _DescriptionWidgetState();
+}
+
+class _DescriptionWidgetState extends State<DescriptionWidget> {
   final _controller = TextEditingController();
 
   @override
@@ -28,49 +117,67 @@ class _ResultBottomSheetState extends State<ResultBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<TimerBloc, TimerState>(
-      buildWhen: (prev, state) =>
-          prev.resultInBottomSheet != state.resultInBottomSheet,
-      builder: (context, state) {
-        final bloc = context.read<TimerBloc>();
-        return Padding(
-          padding:
-              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(state.resultInBottomSheet!.stringTime),
-              if (state.resultInBottomSheet!.isDNF)
-                const Text("DNF", style: TextStyle(color: Colors.red))
-              else if (state.resultInBottomSheet!.isPlus2)
-                const Text("+2", style: TextStyle(color: Colors.red)),
-              Row(
-                children: [
-                  ResultBottomSheetPlus2ButtonWidget(
-                    resultEntity: state.resultInBottomSheet!,
-                  ),
-                  ResultBottomSheetDNFButtonWidget(
-                    resultEntity: state.resultInBottomSheet!,
-                  ),
-                  ResultBottomSheetDeleteButtonWidget(
-                    resultEntity: state.resultInBottomSheet!,
-                  ),
-                ],
-              ),
-              Text(state.resultInBottomSheet!.scramble),
-              TextField(
-                controller: _controller,
-                minLines: 2,
-                maxLines: 2,
-                onChanged: (text) {
-                  bloc.add(TimerUpdateDescriptionEvent(text, widget.index));
-                },
-              ),
-            ],
+    final bloc = context.read<TimerBloc>();
+    return SizedBox(
+      child: TextField(
+        decoration: InputDecoration(
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(20),
+          )
+        ),
+        controller: _controller,
+        minLines: 6,
+        maxLines: 6,
+        onChanged: (text) {
+          bloc.add(TimerUpdateDescriptionEvent(text, widget.index));
+        },
+      ),
+    );
+  }
+}
+
+class ScrambleWidget extends StatelessWidget {
+  const ScrambleWidget({Key? key, required this.scramble}) : super(key: key);
+
+  final String scramble;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      scramble,
+      style: const TextStyle(
+        color: Colors.black,
+        fontSize: 16,
+      ),
+    );
+  }
+}
+
+class SolveTimeWidget extends StatelessWidget {
+  const SolveTimeWidget(
+      {Key? key, required this.time, required this.isPlus, required this.isDNF})
+      : super(key: key);
+
+  final String time;
+  final bool isPlus;
+  final bool isDNF;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text(time,
+            style: const TextStyle(
+              fontSize: 24,
+              color: Colors.black,
+            )),
+        const SizedBox(width: 10),
+        if (isPlus)
+          const Text(
+            "+2",
+            style: TextStyle(color: Colors.red, fontSize: 24),
           ),
-        );
-      },
+      ],
     );
   }
 }
@@ -85,22 +192,31 @@ class ResultBottomSheetPlus2ButtonWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bloc = context.read<TimerBloc>();
-    var backgroundColor = Colors.transparent;
+    var backgroundColor = Colors.white;
     if (resultEntity.isPlus2) {
       backgroundColor = Colors.red;
     }
-    return ElevatedButton(
-      onPressed: () {
-        bloc.add(TimerPlus2Event(resultEntity));
-      },
-      style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.all(backgroundColor),
-        shape: MaterialStateProperty.all(RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30),
-          side: const BorderSide(width: 3, color: Colors.black),
-        )),
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: GestureDetector(
+        onTap: () {
+          bloc.add(TimerPlus2Event(resultEntity));
+        },
+        child: Container(
+          width: 70,
+          height: 70,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            borderRadius: const BorderRadius.all(Radius.circular(100)),
+            border: Border.all(width: 2),
+            color: backgroundColor,
+          ),
+          child: const Text(
+            "+2",
+            style: TextStyle(fontSize: 25, color: Colors.black),
+          ),
+        ),
       ),
-      child: const Text("+2", style: TextStyle(color: Colors.black)),
     );
   }
 }
@@ -108,8 +224,7 @@ class ResultBottomSheetPlus2ButtonWidget extends StatelessWidget {
 class ResultBottomSheetDNFButtonWidget extends StatelessWidget {
   final ResultEntity resultEntity;
 
-  const ResultBottomSheetDNFButtonWidget(
-      {Key? key, required this.resultEntity})
+  const ResultBottomSheetDNFButtonWidget({Key? key, required this.resultEntity})
       : super(key: key);
 
   @override
@@ -119,18 +234,27 @@ class ResultBottomSheetDNFButtonWidget extends StatelessWidget {
     if (resultEntity.isDNF) {
       backgroundColor = Colors.red;
     }
-    return ElevatedButton(
-      onPressed: () {
-        bloc.add(TimerDNFEvent(resultEntity));
-      },
-      style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.all(backgroundColor),
-        shape: MaterialStateProperty.all(RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30),
-          side: const BorderSide(width: 3, color: Colors.black),
-        )),
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: GestureDetector(
+        onTap: () {
+          bloc.add(TimerDNFEvent(resultEntity));
+        },
+        child: Container(
+          width: 70,
+          height: 70,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            borderRadius: const BorderRadius.all(Radius.circular(100)),
+            border: Border.all(width: 2),
+            color: backgroundColor,
+          ),
+          child: const Text(
+            "DNF",
+            style: TextStyle(fontSize: 25, color: Colors.black),
+          ),
+        ),
       ),
-      child: const Text("DNF", style: TextStyle(color: Colors.black)),
     );
   }
 }
@@ -138,19 +262,36 @@ class ResultBottomSheetDNFButtonWidget extends StatelessWidget {
 class ResultBottomSheetDeleteButtonWidget extends StatelessWidget {
   final ResultEntity resultEntity;
 
-  const ResultBottomSheetDeleteButtonWidget({Key? key, required this.resultEntity})
+  final FocusNode _focusNode = FocusNode();
+
+  ResultBottomSheetDeleteButtonWidget(
+      {Key? key, required this.resultEntity})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final bloc = context.read<TimerBloc>();
-    return IconButton(
-        onPressed: () {
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: GestureDetector(
+        onTap: () {
+          if (_focusNode.hasFocus) {
+            FocusScope.of(context).unfocus();
+          }
           bloc.add(TimerDeleteResultEvent(resultEntity));
           Navigator.of(context).pop();
         },
-        icon: Icon(
-          Icons.delete,
-        ));
+        child: Container(
+          width: 70,
+          height: 70,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            borderRadius: const BorderRadius.all(Radius.circular(100)),
+            border: Border.all(width: 2),
+          ),
+          child: const Icon(Icons.delete),
+        ),
+      ),
+    );
   }
 }

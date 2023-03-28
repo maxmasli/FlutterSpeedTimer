@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:speedtimer_flutter/core/utils/utils.dart';
 import 'package:speedtimer_flutter/di.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/entities/events.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/entities/result_entity.dart';
@@ -131,7 +129,8 @@ class ResultsAvgWidget extends StatelessWidget {
     final style = TextStyle(
         fontSize: 16, color: Theme.of(context).textTheme.bodyMedium!.color);
     return BlocBuilder<TimerBloc, TimerState>(
-      buildWhen: (prev, state) => prev.avgEntity != state.avgEntity,
+      buildWhen: (prev, state) =>
+          prev.avgEntity != state.avgEntity || prev.results != state.results,
       builder: (context, state) {
         return Expanded(
           child: Padding(
@@ -161,7 +160,9 @@ class ResultsBestAvgWidget extends StatelessWidget {
     final style = TextStyle(
         fontSize: 16, color: Theme.of(context).textTheme.bodyMedium!.color);
     return BlocBuilder<TimerBloc, TimerState>(
-      buildWhen: (prev, state) => prev.bestAvgEntity != state.bestAvgEntity,
+      buildWhen: (prev, state) =>
+          prev.bestAvgEntity != state.bestAvgEntity ||
+          prev.bestSolve != state.bestSolve,
       builder: (context, state) {
         return Expanded(
           child: Padding(
@@ -191,7 +192,6 @@ class ResultsBestAvgWidget extends StatelessWidget {
 class ResultsDeleteAllButtonWidget extends StatelessWidget {
   const ResultsDeleteAllButtonWidget({Key? key}) : super(key: key);
 
-//
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -215,24 +215,6 @@ class ResultsDeleteAllButtonWidget extends StatelessWidget {
   }
 }
 
-class ResultEventImageWidget extends StatelessWidget {
-  const ResultEventImageWidget({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<TimerBloc, TimerState>(
-      buildWhen: (prev, state) => prev.event != state.event,
-      builder: (context, state) {
-        return SvgPicture.asset(
-          getSvgAssetByEvent(state.event),
-          width: 50,
-          height: 50,
-        );
-      },
-    );
-  }
-}
-
 class ResultsWidget extends StatelessWidget {
   const ResultsWidget({Key? key}) : super(key: key);
 
@@ -245,7 +227,8 @@ class ResultsWidget extends StatelessWidget {
           prev.isLoading != state.isLoading,
       builder: (context, state) {
         if (state.isLoading) {
-          return const Expanded(child: CircularProgressIndicator());
+          return const Expanded(
+              child: Center(child: CircularProgressIndicator()));
         } else {
           return Expanded(
             child: GridView.builder(
