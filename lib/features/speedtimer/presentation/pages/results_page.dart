@@ -4,6 +4,7 @@ import 'package:speedtimer_flutter/di.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/entities/events.dart';
 import 'package:speedtimer_flutter/features/speedtimer/domain/entities/result_entity.dart';
 import 'package:speedtimer_flutter/features/speedtimer/presentation/bloc/timer_bloc.dart';
+import 'package:speedtimer_flutter/features/speedtimer/presentation/widgets/delete_alert_dialog.dart';
 import 'package:speedtimer_flutter/features/speedtimer/presentation/widgets/result_bottom_sheet.dart';
 
 class ResultsPage extends StatelessWidget {
@@ -196,7 +197,12 @@ class ResultsDeleteAllButtonWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        context.read<TimerBloc>().add(TimerDeleteAllResultsEvent());
+        //context.read<TimerBloc>().add(TimerDeleteAllResultsEvent());
+        showDialog(
+            context: context,
+            builder: (context) {
+              return const DeleteAlertDialog();
+            });
       },
       child: Container(
         padding: const EdgeInsets.all(10),
