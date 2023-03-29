@@ -36,7 +36,7 @@ class SettingsPage extends StatelessWidget {
                                   .color!),
                         ),
                         subtitle: Text(
-                          state.settingsEntity.delay.toString(),
+                          "${state.settingsEntity.delay.toString()} s.",
                           style: TextStyle(
                               color: Theme.of(context)
                                   .textTheme
