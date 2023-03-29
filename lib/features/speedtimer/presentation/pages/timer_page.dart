@@ -351,7 +351,7 @@ class TimerResultsButtonWidget extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(right: 5),
         decoration: BoxDecoration(
-            color: const Color(0xFFFFFFFF).withOpacity(0.5),
+            color: const Color(0xFFFFFFFF).withOpacity(0.3),
             borderRadius: const BorderRadius.all(Radius.circular(100))),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 3),
@@ -378,7 +378,7 @@ class TimerSettingsButtonWidget extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(left: 5),
         decoration: BoxDecoration(
-            color: const Color(0xFFFFFFFF).withOpacity(0.5),
+            color: const Color(0xFFFFFFFF).withOpacity(0.3),
             borderRadius: const BorderRadius.all(Radius.circular(100))),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 3),
