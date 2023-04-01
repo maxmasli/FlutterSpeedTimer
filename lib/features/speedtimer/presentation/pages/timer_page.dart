@@ -13,13 +13,18 @@ class TimerPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.primary,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: const [
-          TimerChangeEventButtonWidget(),
-          TimerBodyWidget(),
-          TimerPenaltyWidget(),
-        ],
+      body: BlocBuilder<TimerBloc, TimerState>(
+        builder: (context, state) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              TimerChangeEventButtonWidget(),
+              TimerBodyWidget(),
+              TimerPenaltyWidget(),
+            ],
+          );
+        },
       ),
     );
   }
@@ -47,16 +52,27 @@ class TimerPenaltyWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: const [
-          TimerPlus2ButtonWidget(),
-          TimerDNFButtonWidget(),
-          TimerDeleteResultWidget()
-        ],
-      ),
+    return BlocBuilder<TimerBloc, TimerState>(
+      buildWhen: (prev, state) => prev.timerStateEnum != state.timerStateEnum,
+      builder: (context, state) {
+        return Visibility(
+          visible: state.timerStateEnum != TimerStateEnum.running,
+          maintainSize: true,
+          maintainAnimation: true,
+          maintainState: true,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: const [
+                TimerPlus2ButtonWidget(),
+                TimerDNFButtonWidget(),
+                TimerDeleteResultWidget()
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -110,9 +126,12 @@ class TimerWidget extends StatelessWidget {
         if (state.timerStateEnum == TimerStateEnum.readyToStart) {
           textColor = Colors.green;
         }
+        final double fontSize =
+            state.timerStateEnum != TimerStateEnum.running ? 60 : 80;
         return Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.max,
           children: [
             SizedBox(
               width: double.infinity,
@@ -120,7 +139,7 @@ class TimerWidget extends StatelessWidget {
                 children: [
                   Text(
                     millisToString(state.timeInMillis),
-                    style: TextStyle(fontSize: 60, color: textColor),
+                    style: TextStyle(fontSize: fontSize, color: textColor),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -183,14 +202,22 @@ class TimerScrambleWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<TimerBloc, TimerState>(
-      buildWhen: (prev, state) => prev.scramble != state.scramble,
+      buildWhen: (prev, state) =>
+          prev.scramble != state.scramble ||
+          prev.timerStateEnum != state.timerStateEnum,
       builder: (context, state) {
-        return Text(
-          state.scramble,
-          style: TextStyle(
-              fontSize: 24,
-              color: Theme.of(context).textTheme.bodyMedium!.color),
-          textAlign: TextAlign.center,
+        return Visibility(
+          visible: state.timerStateEnum != TimerStateEnum.running,
+          maintainState: true,
+          maintainAnimation: true,
+          maintainSize: true,
+          child: Text(
+            state.scramble,
+            style: TextStyle(
+                fontSize: 24,
+                color: Theme.of(context).textTheme.bodyMedium!.color),
+            textAlign: TextAlign.center,
+          ),
         );
       },
     );
@@ -306,34 +333,46 @@ class TimerChangeEventButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        showDialog(
-            context: context,
-            builder: (context) {
-              return const ChangeEventDialog();
-            });
+    return BlocBuilder<TimerBloc, TimerState>(
+      buildWhen: (prev, state) => prev.timerStateEnum != state.timerStateEnum,
+      builder: (context, state) {
+        return Visibility(
+          visible: state.timerStateEnum != TimerStateEnum.running,
+          maintainSize: true,
+          maintainAnimation: true,
+          maintainState: true,
+          child: GestureDetector(
+            onTap: () {
+              showDialog(
+                  context: context,
+                  builder: (context) {
+                    return const ChangeEventDialog();
+                  });
+            },
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              width: double.infinity,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.secondary,
+                border: Border.all(width: 2),
+                borderRadius: const BorderRadius.all(Radius.circular(10)),
+              ),
+              child: BlocBuilder<TimerBloc, TimerState>(
+                buildWhen: (prev, state) => prev.event != state.event,
+                builder: (context, state) {
+                  return Text(state.event.toEventString(),
+                      style: TextStyle(
+                          fontSize: 30,
+                          color:
+                              Theme.of(context).textTheme.bodyMedium!.color));
+                },
+              ),
+            ),
+          ),
+        );
       },
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        width: double.infinity,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.secondary,
-          border: Border.all(width: 2),
-          borderRadius: const BorderRadius.all(Radius.circular(10)),
-        ),
-        child: BlocBuilder<TimerBloc, TimerState>(
-          buildWhen: (prev, state) => prev.event != state.event,
-          builder: (context, state) {
-            return Text(state.event.toEventString(),
-                style: TextStyle(
-                    fontSize: 30,
-                    color: Theme.of(context).textTheme.bodyMedium!.color));
-          },
-        ),
-      ),
     );
   }
 }
@@ -343,24 +382,35 @@ class TimerResultsButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        sl<PageController>().animateToPage(2,
-            duration: const Duration(milliseconds: 200), curve: Curves.ease);
-      },
-      child: Container(
-        margin: const EdgeInsets.only(right: 5),
-        decoration: BoxDecoration(
-            color: const Color(0xFFFFFFFF).withOpacity(0.3),
-            borderRadius: const BorderRadius.all(Radius.circular(100))),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 3),
-          child: Icon(
-            Icons.arrow_forward_ios,
-            color: Theme.of(context).textTheme.bodyMedium!.color,
+    return BlocBuilder<TimerBloc, TimerState>(
+      buildWhen: (prev, state) => prev.timerStateEnum != state.timerStateEnum,
+      builder: (context, state) {
+        return Visibility(
+          visible: state.timerStateEnum != TimerStateEnum.running,
+          maintainState: true,
+          maintainAnimation: true,
+          maintainSize: true,
+          child: Container(
+            margin: const EdgeInsets.only(right: 5),
+            child: InkWell(
+              borderRadius: const BorderRadius.all(Radius.circular(100)),
+              onTap: () {
+                sl<PageController>().animateToPage(2,
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.ease);
+              },
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 60, horizontal: 3),
+                child: Icon(
+                  Icons.arrow_forward_ios,
+                  color: Theme.of(context).textTheme.bodyMedium!.color,
+                ),
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -370,24 +420,35 @@ class TimerSettingsButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        sl<PageController>().animateToPage(0,
-            duration: const Duration(milliseconds: 200), curve: Curves.ease);
-      },
-      child: Container(
-        margin: const EdgeInsets.only(left: 5),
-        decoration: BoxDecoration(
-            color: const Color(0xFFFFFFFF).withOpacity(0.3),
-            borderRadius: const BorderRadius.all(Radius.circular(100))),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 3),
-          child: Icon(
-            Icons.arrow_back_ios_new,
-            color: Theme.of(context).textTheme.bodyMedium!.color,
+    return BlocBuilder<TimerBloc, TimerState>(
+      buildWhen: (prev, state) => prev.timerStateEnum != state.timerStateEnum,
+      builder: (context, state) {
+        return Visibility(
+          visible: state.timerStateEnum != TimerStateEnum.running,
+          maintainSize: true,
+          maintainAnimation: true,
+          maintainState: true,
+          child: Container(
+            margin: const EdgeInsets.only(left: 5),
+            child: InkWell(
+              onTap: () {
+                sl<PageController>().animateToPage(0,
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.ease);
+              },
+              borderRadius: const BorderRadius.all(Radius.circular(100)),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 60, horizontal: 3),
+                child: Icon(
+                  Icons.arrow_back_ios_new,
+                  color: Theme.of(context).textTheme.bodyMedium!.color,
+                ),
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
