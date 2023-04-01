@@ -504,6 +504,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
   void _stopListeningTimer() {
     _speedcubingTimer.stopTimer();
     _timer?.cancel();
+    emit(state.copyWith(timeInMillis: _speedcubingTimer.getTime())); // to correct time
   }
 
   ///This method updates the current time state every 13 milliseconds
